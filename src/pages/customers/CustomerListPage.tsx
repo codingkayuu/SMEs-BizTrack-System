@@ -19,7 +19,7 @@ const customerSchema = z.object({
 type CustomerFormData = z.infer<typeof customerSchema>;
 
 export function CustomerListPage() {
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -34,15 +34,15 @@ export function CustomerListPage() {
 
     useEffect(() => {
         fetchCustomers();
-    }, [user]);
+    }, [user, profile]);
 
     const fetchCustomers = async () => {
-        if (!user) return;
+        if (!user || !profile) return;
         try {
             const { data, error } = await supabase
                 .from('customers')
                 .select('*')
-                .eq('user_id', user.id)
+                .eq('business_id', profile.id)
                 .order('name');
 
             if (error) throw error;
@@ -55,7 +55,7 @@ export function CustomerListPage() {
     };
 
     const onSubmit = async (data: CustomerFormData) => {
-        if (!user) return;
+        if (!user || !profile) return;
         setSubmitting(true);
         try {
             if (editingCustomer) {
@@ -67,7 +67,7 @@ export function CustomerListPage() {
             } else {
                 const { error } = await supabase
                     .from('customers')
-                    .insert([{ ...data, user_id: user.id, business_id: user.id }]); // Assuming simpler schema for now or trigger handles business_id map
+                    .insert([{ ...data, business_id: profile.id }]);
                 if (error) throw error;
             }
 

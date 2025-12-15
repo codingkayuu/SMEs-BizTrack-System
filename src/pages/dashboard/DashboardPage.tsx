@@ -4,8 +4,9 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { DashboardStats } from './DashboardStats';
 import { RecentTransactions } from './RecentTransactions';
+import { FinancialOverviewChart } from './FinancialOverviewChart';
+import { Button } from '../../components/ui/Button';
 import type { Income, Expense } from '../../types';
-import { cn } from '../../lib/utils';
 
 export function DashboardPage() {
     const { user } = useAuth();
@@ -32,7 +33,7 @@ export function DashboardPage() {
             const { data: incomeData } = await supabase
                 .from('income')
                 .select('*')
-                .eq('user_id', user.id) // Note: RLS should handle this, but adding for safety if schema varies
+                .eq('user_id', user.id)
                 .order('date', { ascending: false });
 
             // Fetch Expenses
@@ -56,9 +57,6 @@ export function DashboardPage() {
             setTransactions(combined);
 
             // Calculate Stats
-            // Implementation detail: Filter and sum based on dates
-            // For brevity, using simple filters here. In production, consider DB aggregation or better dates.
-
             const calcStats = (items: any[], start: string) =>
                 items.filter(i => i.date >= start).reduce((sum, i) => sum + (i.amount || 0), 0);
 
@@ -86,38 +84,54 @@ export function DashboardPage() {
 
     useEffect(() => {
         fetchData();
+
+        // Realtime subscription
+        const channels = supabase.channel('custom-dashboard-channel')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'income' },
+                () => fetchData()
+            )
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'expenses' },
+                () => fetchData()
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channels);
+        };
     }, [user]);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8 max-w-7xl mx-auto">
+            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                    <p className="mt-1 text-sm text-gray-500">Overview of your business performance.</p>
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+                    <p className="mt-2 text-sm text-gray-500">Welcome back, here's what's happening today.</p>
                 </div>
-                <button
-                    onClick={fetchData}
-                    className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                    <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
-                    Refresh
-                </button>
+                <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+                    <span className="text-sm font-medium text-gray-500 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
+                        {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    </span>
+                    <Button variant="secondary" onClick={fetchData} isLoading={loading} leftIcon={RefreshCw}>
+                        Refresh
+                    </Button>
+                </div>
             </div>
 
+            {/* Stats Cards */}
             <DashboardStats
                 today={stats.today}
                 week={stats.week}
                 month={stats.month}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Overview</h3>
-                    <div className="h-80 flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 text-gray-400">
-                        Chart Component Coming Soon
-                    </div>
-                </div>
-
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 content-stretch">
+                <FinancialOverviewChart />
                 <div className="lg:col-span-1 h-full">
                     <RecentTransactions transactions={transactions} loading={loading} />
                 </div>

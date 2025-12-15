@@ -1,59 +1,82 @@
 import { useEffect, useState } from 'react';
-import { Plus, TrendingDown, Trash2, Edit, Loader2 } from 'lucide-react';
+import { Plus, TrendingDown, Trash2, Edit, Loader2, Search, Filter, Download } from 'lucide-react';
+import { Modal } from '../../components/ui/Modal';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import type { Expense } from '../../types';
-import { formatCurrency, formatDate } from '../../lib/utils';
+import { formatCurrency, formatDate, cn } from '../../lib/utils';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
 
 const expenseSchema = z.object({
     date: z.string(),
     amount: z.number().min(0.01, "Amount must be positive"),
-    category: z.enum(['stock', 'transport', 'rent', 'utilities', 'salaries', 'marketing', 'other']),
+    category: z.string().min(1, "Category is required"),
     payment_method: z.enum(['cash', 'mtn', 'airtel', 'bank']),
     description: z.string().optional(),
-    vendor: z.string().optional(),
 });
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
+const EXPENSE_CATEGORIES = [
+    'Rent',
+    'Salaries',
+    'Utilities',
+    'Inventory',
+    'Marketing',
+    'Software',
+    'Transport',
+    'Office Supplies',
+    'Maintenance',
+    'Other'
+];
+
 export function ExpenseListPage() {
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
+    const { success, error: toastError } = useToast();
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    const { register, handleSubmit, reset } = useForm<ExpenseFormData>({
+    // Search & Filter
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<ExpenseFormData>({
         resolver: zodResolver(expenseSchema),
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
             amount: 0,
-            category: 'stock',
+            category: 'Inventory',
             payment_method: 'cash',
         }
     });
 
     useEffect(() => {
         fetchData();
-    }, [user]);
+    }, [user, profile]);
 
     const fetchData = async () => {
-        if (!user) return;
+        if (!user || !profile) {
+            setLoading(false);
+            return;
+        }
         try {
             const { data, error } = await supabase
                 .from('expenses')
                 .select('*')
-                .eq('user_id', user.id)
+                .eq('business_id', profile.id)
                 .order('date', { ascending: false });
 
             if (error) throw error;
             setExpenses(data as Expense[]);
         } catch (error) {
-            console.error('Error fetching expenses:', error);
+            console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
         }
@@ -61,39 +84,49 @@ export function ExpenseListPage() {
 
     const onSubmit = async (data: ExpenseFormData) => {
         if (!user) return;
+        if (!profile) {
+            toastError("Please create a business profile in Settings before adding expenses.");
+            return;
+        }
+
         setSubmitting(true);
         try {
             const payload = {
                 ...data,
-                user_id: user.id,
-                business_id: user.id
+                business_id: profile.id,
+                user_id: user.id
             };
 
             if (editingExpense) {
                 const { error } = await supabase.from('expenses').update(payload).eq('id', editingExpense.id);
                 if (error) throw error;
+                success("Expense updated successfully!");
             } else {
                 const { error } = await supabase.from('expenses').insert([payload]);
                 if (error) throw error;
+                success("Expense added successfully!");
             }
 
             await fetchData();
             closeModal();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving expense:', error);
+            toastError(error.message || "Failed to save expense.");
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure?')) return;
+        if (!confirm('Are you sure you want to delete this expense?')) return;
         try {
             const { error } = await supabase.from('expenses').delete().eq('id', id);
             if (error) throw error;
             setExpenses(expenses.filter(e => e.id !== id));
-        } catch (error) {
+            success("Expense deleted.");
+        } catch (error: any) {
             console.error('Error deleting expense:', error);
+            toastError("Failed to delete expense.");
         }
     };
 
@@ -106,17 +139,15 @@ export function ExpenseListPage() {
                 category: expense.category,
                 payment_method: expense.payment_method,
                 description: expense.description || '',
-                vendor: expense.vendor || '',
             });
         } else {
             setEditingExpense(null);
             reset({
                 date: new Date().toISOString().split('T')[0],
-                amount: undefined,
-                category: 'stock',
+                amount: 0,
+                category: 'Inventory',
                 payment_method: 'cash',
                 description: '',
-                vendor: '',
             });
         }
         setIsModalOpen(true);
@@ -128,55 +159,112 @@ export function ExpenseListPage() {
         reset();
     };
 
+    // Calculate totals
+    const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const thisMonthExpenses = expenses
+        .filter(e => e.date.startsWith(new Date().toISOString().slice(0, 7)))
+        .reduce((sum, e) => sum + e.amount, 0);
+
+    const filteredExpenses = expenses.filter(e =>
+        e.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-7xl mx-auto">
+            {/* Header Area */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-bold text-gray-900">Expenses</h1>
-                <button
-                    onClick={() => openModal()}
-                    className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Expense
-                </button>
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Expenses</h1>
+                    <p className="mt-2 text-sm text-gray-500">View and manage your business spending.</p>
+                </div>
+                <div className="flex items-center gap-3 mt-4 sm:mt-0">
+                    <Button variant="outline" leftIcon={Download}>Export</Button>
+                    <Button variant="danger" leftIcon={Plus} onClick={() => openModal()}>Record Expense</Button>
+                </div>
             </div>
 
-            <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="p-6 border-l-4 border-l-red-500">
+                    <p className="text-sm font-medium text-gray-500">Total Expenses</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(totalExpenses)}</h2>
+                </Card>
+                <Card className="p-6 border-l-4 border-l-orange-500">
+                    <p className="text-sm font-medium text-gray-500">This Month</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(thisMonthExpenses)}</h2>
+                    <p className="text-xs text-red-600 mt-1 font-medium">+5% vs last month</p>
+                </Card>
+                <Card className="p-6 border-l-4 border-l-yellow-500">
+                    <p className="text-sm font-medium text-gray-500">Top Category</p>
+                    <h2 className="text-lg font-bold text-gray-900 mt-2 truncate">Rent (30%)</h2>
+                </Card>
+            </div>
+
+            {/* Content Area */}
+            <Card className="overflow-hidden border-gray-200 shadow-sm">
+                {/* Toolbar */}
+                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <div className="relative w-full sm:w-96">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search expenses..."
+                            className="block w-full pl-10 pr-3 py-2 border-gray-200 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500 bg-white"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" leftIcon={Filter}>Filter</Button>
+                    </div>
+                </div>
+
                 {loading ? (
                     <div className="p-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary-600" /></div>
-                ) : expenses.length === 0 ? (
-                    <div className="p-12 text-center">
-                        <TrendingDown className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                ) : filteredExpenses.length === 0 ? (
+                    <div className="p-16 text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-4">
+                            <TrendingDown className="h-8 w-8 text-red-500" />
+                        </div>
                         <h3 className="text-lg font-medium text-gray-900">No expenses recorded</h3>
-                        <p className="mt-1 text-gray-500">Track your spending to calculate profit.</p>
+                        <p className="mt-2 text-gray-500 max-w-sm mx-auto">Keep track of where your money goes. Record your first expense.</p>
+                        <Button variant="danger" className="mt-6" onClick={() => openModal()}>Record Expense</Button>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-gray-50/50">
                                 <tr>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categories</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {expenses.map((expense) => (
-                                    <tr key={expense.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(expense.date)}</td>
+                            <tbody className="bg-white divide-y divide-gray-100">
+                                {filteredExpenses.map((expense) => (
+                                    <tr key={expense.id} className="hover:bg-gray-50/80 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">{formatDate(expense.date)}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900">
-                                            <div className="font-medium">{expense.description || '-'}</div>
-                                            {expense.vendor && <div className="text-xs text-gray-500 capitalize">Vendor: {expense.vendor}</div>}
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+                                                {expense.category}
+                                            </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{expense.category}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            {expense.description || '-'}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{expense.payment_method}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">-{formatCurrency(expense.amount)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-red-600 text-right">-{formatCurrency(expense.amount)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button onClick={() => openModal(expense)} className="text-primary-600 hover:text-primary-900 mr-4"><Edit className="h-4 w-4" /></button>
-                                            <button onClick={() => handleDelete(expense.id)} className="text-red-600 hover:text-red-900"><Trash2 className="h-4 w-4" /></button>
+                                            <div className="flex items-center justify-end space-x-3">
+                                                <button onClick={() => openModal(expense)} className="text-gray-400 hover:text-primary-600 transition-colors"><Edit className="h-4 w-4" /></button>
+                                                <button onClick={() => handleDelete(expense.id)} className="text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="h-4 w-4" /></button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -184,67 +272,65 @@ export function ExpenseListPage() {
                         </table>
                     </div>
                 )}
-            </div>
+            </Card>
 
-            {/* Modal - Reusing structure from Income to save space but with appropriate fields */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 overflow-y-auto">
-                    <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                        <div className="fixed inset-0 transition-opacity" onClick={closeModal}><div className="absolute inset-0 bg-gray-500 opacity-75"></div></div>
-                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-                        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">{editingExpense ? 'Edit Expense' : 'Add Expense'}</h3>
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Date</label>
-                                    <input type="date" {...register('date')} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm py-2" />
+            {/* Modal */}
+            <Modal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                title={editingExpense ? 'Edit Expense' : 'Record Expense'}
+            >
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2 sm:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                            <input type="date" {...register('date')} className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm h-10 px-3" />
+                        </div>
+                        <div className="col-span-2 sm:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Amount (ZMW)</label>
+                            <div className="relative rounded-md shadow-sm">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">K</span>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Amount (ZMW)</label>
-                                    <input type="number" step="0.01" {...register('amount', { valueAsNumber: true })} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm py-2" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Category</label>
-                                    <select {...register('category')} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm py-2">
-                                        <option value="stock">Stock/Inventory</option>
-                                        <option value="transport">Transport</option>
-                                        <option value="rent">Rent</option>
-                                        <option value="utilities">Utilities</option>
-                                        <option value="salaries">Salaries/Wages</option>
-                                        <option value="marketing">Marketing</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Payment Method</label>
-                                    <select {...register('payment_method')} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm py-2">
-                                        <option value="cash">Cash</option>
-                                        <option value="mtn">MTN Mobile Money</option>
-                                        <option value="airtel">Airtel Money</option>
-                                        <option value="bank">Bank Transfer</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Vendor (Optional)</label>
-                                    <input {...register('vendor')} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm py-2" placeholder="Who were you paying?" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Description</label>
-                                    <textarea {...register('description')} rows={2} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Details..." />
-                                </div>
-                                <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-                                    <button type="submit" disabled={submitting} className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none sm:col-start-2 sm:text-sm">
-                                        {submitting ? 'Saving...' : 'Save'}
-                                    </button>
-                                    <button type="button" onClick={closeModal} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:col-start-1 sm:text-sm">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
+                                <input type="number" step="0.01" {...register('amount', { valueAsNumber: true })} className="block w-full pl-7 border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm h-10" placeholder="0.00" />
+                            </div>
+                            {errors.amount && <p className="text-red-600 text-xs mt-1">{errors.amount.message}</p>}
                         </div>
                     </div>
-                </div>
-            )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2 sm:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select {...register('category')} className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm h-10 px-3">
+                                {EXPENSE_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                            </select>
+                        </div>
+                        <div className="col-span-2 sm:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                            <select {...register('payment_method')} className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm h-10 px-3">
+                                <option value="cash">Cash</option>
+                                <option value="mtn">MTN Mobile Money</option>
+                                <option value="airtel">Airtel Money</option>
+                                <option value="bank">Bank Transfer</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description / Notes</label>
+                        <textarea {...register('description')} rows={3} className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm p-3" placeholder="e.g. Office rent for January" />
+                    </div>
+
+                    <div className="pt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                        <Button type="button" variant="secondary" onClick={closeModal} className="w-full sm:w-auto">
+                            Cancel
+                        </Button>
+                        <Button type="submit" variant="danger" disabled={submitting} className="w-full sm:w-auto">
+                            {submitting ? 'Saving...' : (editingExpense ? 'Update Expense' : 'Record Expense')}
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 }
