@@ -16,18 +16,20 @@ export function Card({
     return (
         <div
             className={cn(
-                "rounded-2xl transition-all duration-300",
+                "rounded-2xl transition-all duration-300 relative overflow-hidden",
                 {
-                    'bg-white border border-gray-100 shadow-sm': variant === 'default',
-                    'glass-card': variant === 'glass',
-                    'bg-transparent border border-gray-200': variant === 'outline',
-                    'hover:shadow-lg hover:-translate-y-1': hoverEffect
+                    'bg-white border border-purple-100 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)]': variant === 'default' || variant === 'glass',
+                    'bg-transparent border border-purple-200': variant === 'outline',
+                    'hover:shadow-[0_12px_24px_-8px_rgba(124,58,237,0.15)] hover:-translate-y-1 hover:border-[#7C3AED]/40': hoverEffect
                 },
                 className
             )}
             {...props}
         >
-            {children}
+            {hoverEffect && (
+                <div className="absolute inset-0 bg-gradient-to-tr from-purple-50/0 via-purple-50/50 to-purple-50/0 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            )}
+            <div className="relative z-10">{children}</div>
         </div>
     );
 }

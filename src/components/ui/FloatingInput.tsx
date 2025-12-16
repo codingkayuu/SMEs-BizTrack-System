@@ -36,10 +36,10 @@ export function FloatingInput({ label, icon: Icon, registration, error, classNam
                 <input
                     type={inputType}
                     className={cn(
-                        "peer block w-full rounded-xl border-gray-200 bg-gray-50/50 px-4 pt-6 pb-2 text-gray-900 placeholder-transparent focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10 transition-all duration-200 outline-none h-[52px]",
+                        "peer block w-full rounded-xl border-gray-200 bg-white/50 dark:bg-slate-800/50 px-4 pt-6 pb-2 text-gray-900 dark:text-white placeholder-transparent focus:border-[#00A86B] focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-[#00A86B]/10 transition-all duration-300 outline-none h-[52px]",
                         Icon ? "pl-12" : "",
                         isPassword ? "pr-12" : "",
-                        error ? "border-red-300 focus:border-red-500 focus:ring-red-200 bg-red-50/10" : "",
+                        error ? "border-[#DE2010] focus:border-[#DE2010] focus:ring-[#DE2010]/10 bg-red-50/10" : "",
                         className
                     )}
                     placeholder={label}
@@ -57,9 +57,9 @@ export function FloatingInput({ label, icon: Icon, registration, error, classNam
 
                 <label
                     className={cn(
-                        "absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-200 pointer-events-none origin-[0]",
+                        "absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-all duration-300 pointer-events-none origin-[0]",
                         Icon ? "peer-placeholder-shown:left-12" : "",
-                        "peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:top-4 peer-focus:text-primary-600 peer-focus:font-medium",
+                        "peer-focus:-translate-y-3 peer-focus:scale-75 peer-focus:top-4 peer-focus:text-[#00A86B] peer-focus:font-semibold",
                         "peer-not-placeholder-shown:-translate-y-3 peer-not-placeholder-shown:scale-75 peer-not-placeholder-shown:top-4 pointer-events-none",
                         Icon ? "peer-focus:left-12 peer-not-placeholder-shown:left-12" : "" // Keep label aligned with text start
                     )}

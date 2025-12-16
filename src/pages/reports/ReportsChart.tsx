@@ -8,22 +8,23 @@ interface ReportsChartProps {
 
 export function ReportsChart({ data }: ReportsChartProps) {
     return (
-        <Card className="col-span-1 lg:col-span-2 shadow-sm border-gray-100">
-            <CardHeader>
-                <CardTitle className="text-lg font-bold text-gray-800">Income vs Expenses Analysis</CardTitle>
-                <p className="text-sm text-gray-500">Monthly financial performance overview</p>
+
+        <Card className="col-span-1 lg:col-span-2 shadow-md border-gray-100 dark:border-gray-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-white dark:from-slate-800 dark:to-slate-800/80 border-b border-gray-100 dark:border-gray-700/50">
+                <CardTitle className="text-xl font-extrabold text-[#00A86B] tracking-tight">Income vs Expenses</CardTitle>
+                <p className="text-sm text-gray-500 font-medium">Monthly financial performance overview</p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                 <div className="h-[350px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" opacity={0.5} />
                             <XAxis
                                 dataKey="name"
                                 fontSize={12}
                                 tickLine={false}
                                 axisLine={false}
-                                tick={{ fill: '#64748b' }}
+                                tick={{ fill: '#64748b', fontWeight: 600 }}
                                 dy={10}
                             />
                             <YAxis
@@ -34,35 +35,52 @@ export function ReportsChart({ data }: ReportsChartProps) {
                                 tick={{ fill: '#64748b' }}
                             />
                             <Tooltip
-                                cursor={{ fill: '#f8fafc' }}
+                                cursor={{ fill: 'rgba(0, 168, 107, 0.05)' }}
                                 contentStyle={{
-                                    backgroundColor: '#1e293b',
-                                    border: 'none',
-                                    borderRadius: '8px',
+                                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                    backgroundImage: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(8, 12, 18, 0.98))',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '12px',
                                     color: '#fff',
-                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                                    padding: '12px'
                                 }}
-                                itemStyle={{ color: '#fff' }}
+                                itemStyle={{ color: '#fff', paddingBottom: '4px' }}
                                 formatter={(value: number) => [formatCurrency(value), '']}
                             />
                             <Legend
                                 wrapperStyle={{ paddingTop: '20px' }}
                                 iconType="circle"
+                                iconSize={10}
                             />
                             <Bar
                                 name="Income"
                                 dataKey="Income"
-                                fill="#10B981"
-                                radius={[4, 4, 0, 0]}
-                                barSize={20}
-                            />
+                                fill="url(#colorIncome)"
+                                radius={[6, 6, 0, 0]}
+                                barSize={24}
+                            >
+                                <defs>
+                                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#00A86B" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#059669" stopOpacity={0.8} />
+                                    </linearGradient>
+                                </defs>
+                            </Bar>
                             <Bar
                                 name="Expenses"
                                 dataKey="Expense"
-                                fill="#EF4444"
-                                radius={[4, 4, 0, 0]}
-                                barSize={20}
-                            />
+                                fill="url(#colorExpense)"
+                                radius={[6, 6, 0, 0]}
+                                barSize={24}
+                            >
+                                <defs>
+                                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#DE2010" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#B91C1C" stopOpacity={0.8} />
+                                    </linearGradient>
+                                </defs>
+                            </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

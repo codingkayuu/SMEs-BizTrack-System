@@ -9,7 +9,7 @@ import { Button } from '../../components/ui/Button';
 import type { Income, Expense } from '../../types';
 
 export function DashboardPage() {
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const [loading, setLoading] = useState(true);
     const [transactions, setTransactions] = useState<any[]>([]);
     const [stats, setStats] = useState({
@@ -107,30 +107,40 @@ export function DashboardPage() {
     return (
         <div className="space-y-8 max-w-7xl mx-auto">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between animate-fade-in-up duration-500">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
-                    <p className="mt-2 text-sm text-gray-500">Welcome back, here's what's happening today.</p>
+                    <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center">
+                        Dashboard
+                        <span className="ml-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                            <span className="w-2 h-2 rounded-full bg-purple-600 mr-1.5 animate-pulse"></span>
+                            Live Data
+                        </span>
+                    </h1>
+                    <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
+                        Welcome back, <span className="font-bold text-purple-600">{profile?.owner_name || 'User'}</span>! Here's what's happening today.
+                    </p>
                 </div>
                 <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-                    <span className="text-sm font-medium text-gray-500 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
-                        {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-xl border border-purple-100 dark:border-gray-700 shadow-sm">
+                        {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </span>
-                    <Button variant="secondary" onClick={fetchData} isLoading={loading} leftIcon={RefreshCw}>
+                    <Button variant="secondary" onClick={fetchData} isLoading={loading} leftIcon={RefreshCw} className="rounded-xl shadow-sm hover:shadow-md transition-shadow">
                         Refresh
                     </Button>
                 </div>
             </div>
 
             {/* Stats Cards */}
-            <DashboardStats
-                today={stats.today}
-                week={stats.week}
-                month={stats.month}
-            />
+            <div className="animate-fade-in-up stagger-1">
+                <DashboardStats
+                    today={stats.today}
+                    week={stats.week}
+                    month={stats.month}
+                />
+            </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 content-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 content-stretch animate-fade-in-up stagger-2">
                 <FinancialOverviewChart />
                 <div className="lg:col-span-1 h-full">
                     <RecentTransactions transactions={transactions} loading={loading} />

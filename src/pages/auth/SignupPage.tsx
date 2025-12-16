@@ -89,12 +89,12 @@ export function SignupPage() {
         height: '56px',
         padding: '16px 16px 8px 48px',
         fontSize: '16px',
-        border: `2px solid ${hasError ? '#EF4444' : focusedField === field ? '#00A86B' : '#E5E7EB'}`,
+        border: `2px solid ${hasError ? '#EF4444' : focusedField === field ? '#7C3AED' : '#E5E7EB'}`,
         borderRadius: '12px',
         outline: 'none',
-        backgroundColor: focusedField === field ? '#FFFFFF' : '#F9FAFB',
+        backgroundColor: focusedField === field ? '#FFFFFF' : '#FBF7FF',
         transition: 'all 0.2s ease',
-        boxShadow: focusedField === field ? '0 0 0 4px rgba(0, 168, 107, 0.1)' : 'none',
+        boxShadow: focusedField === field ? '0 0 0 4px rgba(124, 58, 237, 0.1)' : 'none',
         fontFamily: 'Inter, sans-serif',
     });
 
@@ -103,7 +103,7 @@ export function SignupPage() {
         left: '48px',
         top: hasValue || focusedField === field ? '8px' : '18px',
         fontSize: hasValue || focusedField === field ? '12px' : '16px',
-        color: focusedField === field ? '#00A86B' : '#6B7280',
+        color: focusedField === field ? '#7C3AED' : '#6B7280',
         transition: 'all 0.2s ease',
         pointerEvents: 'none' as const,
         fontWeight: focusedField === field ? 600 : 400,
@@ -114,7 +114,7 @@ export function SignupPage() {
         left: '16px',
         top: '50%',
         transform: 'translateY(-50%)',
-        color: focusedField === field ? '#00A86B' : '#9CA3AF',
+        color: focusedField === field ? '#7C3AED' : '#9CA3AF',
         transition: 'color 0.2s ease',
     });
 
@@ -127,7 +127,7 @@ export function SignupPage() {
             {/* Left Side - Hero */}
             <div style={{
                 width: '50%',
-                background: 'linear-gradient(135deg, #14532D 0%, #166534 50%, #000000 100%)',
+                background: 'linear-gradient(135deg, #4C1D95 0%, #7C3AED 100%)',
                 position: 'relative',
                 overflow: 'hidden',
                 display: 'flex',
@@ -145,7 +145,7 @@ export function SignupPage() {
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',
-                        opacity: 0.3,
+                        opacity: 0.2,
                         mixBlendMode: 'overlay',
                     }}
                 />
@@ -256,13 +256,13 @@ export function SignupPage() {
                         {/* Business Name Feedback */}
                         {businessName && businessName.length > 2 && (
                             <div style={{
-                                background: '#F0FDF4',
+                                background: '#F5F3FF',
                                 padding: '12px 16px',
                                 borderRadius: '8px',
                                 marginBottom: '20px',
                                 marginTop: '-12px',
                             }}>
-                                <p style={{ color: '#16A34A', fontSize: '14px', margin: 0, fontWeight: 500 }}>
+                                <p style={{ color: '#7C3AED', fontSize: '14px', margin: 0, fontWeight: 500 }}>
                                     ✨ Nice! <strong>{businessName}</strong> sounds professional.
                                 </p>
                             </div>
@@ -373,7 +373,7 @@ export function SignupPage() {
                             style={{
                                 width: '100%',
                                 height: '56px',
-                                background: 'linear-gradient(135deg, #16A34A 0%, #00A86B 100%)',
+                                background: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '12px',
@@ -384,7 +384,7 @@ export function SignupPage() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 gap: '8px',
-                                boxShadow: '0 8px 24px rgba(0, 168, 107, 0.3)',
+                                boxShadow: '0 8px 24px rgba(124, 58, 237, 0.3)',
                                 transition: 'all 0.2s ease',
                                 opacity: loading ? 0.7 : 1,
                             }}
@@ -411,7 +411,7 @@ export function SignupPage() {
 
                     <p style={{ textAlign: 'center', marginTop: '32px', color: '#6B7280' }}>
                         Already have an account?{' '}
-                        <Link to="/login" style={{ color: '#E65A2B', fontWeight: 600, textDecoration: 'none' }}>
+                        <Link to="/login" style={{ color: '#7C3AED', fontWeight: 600, textDecoration: 'none' }}>
                             Sign in
                         </Link>
                     </p>

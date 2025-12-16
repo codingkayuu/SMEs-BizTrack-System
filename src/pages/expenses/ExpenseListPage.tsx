@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Plus, TrendingDown, Trash2, Edit, Loader2, Search, Filter, Download } from 'lucide-react';
+import { Plus, TrendingDown, Trash2, Edit, Loader2, Search, Filter, Download, DollarSign, Calendar, PieChart } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { Expense } from '../../types';
-import { formatCurrency, formatDate, cn } from '../../lib/utils';
+import { formatCurrency, formatDate } from '../../lib/utils';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const expenseSchema = z.object({
     date: z.string(),
@@ -170,41 +172,112 @@ export function ExpenseListPage() {
         e.category.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const handleExport = () => {
+        const doc = new jsPDF();
+
+        // Add company info or title
+        doc.setFontSize(18);
+        doc.setTextColor(220, 38, 38); // Red color
+        doc.text("Expense Report", 14, 22);
+
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+
+        const tableColumn = ["Date", "Category", "Description", "Method", "Amount"];
+        const tableRows = filteredExpenses.map(expense => [
+            formatDate(expense.date),
+            expense.category,
+            expense.description || '-',
+            expense.payment_method,
+            formatCurrency(expense.amount)
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 40,
+            headStyles: { fillColor: [220, 38, 38] }, // Red header
+            alternateRowStyles: { fillColor: [254, 242, 242] }, // Light red alternate rows
+        });
+
+        doc.save(`expense_report_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-8 max-w-7xl mx-auto animate-fade-in-up duration-500">
             {/* Header Area */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Expenses</h1>
-                    <p className="mt-2 text-sm text-gray-500">View and manage your business spending.</p>
+                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                        <span className="w-2 h-8 rounded-full bg-red-500 block"></span>
+                        Expenses
+                    </h1>
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">View and manage your business spending.</p>
                 </div>
                 <div className="flex items-center gap-3 mt-4 sm:mt-0">
-                    <Button variant="outline" leftIcon={Download}>Export</Button>
+                    <Button variant="outline" leftIcon={Download} onClick={handleExport}>Export Report</Button>
                     <Button variant="danger" leftIcon={Plus} onClick={() => openModal()}>Record Expense</Button>
                 </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="p-6 border-l-4 border-l-red-500">
-                    <p className="text-sm font-medium text-gray-500">Total Expenses</p>
-                    <h2 className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(totalExpenses)}</h2>
+            {/* Quick Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-1 animate-fade-in-up">
+                {/* Total Expenses Card */}
+                <Card hoverEffect className="p-6">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 mb-1">Total Expenses</p>
+                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(totalExpenses)}</h2>
+                        </div>
+                        <div className="p-3 bg-red-50 rounded-2xl text-red-600 shadow-sm">
+                            <DollarSign className="h-6 w-6" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-center">
+                        <span className="text-xs font-semibold bg-red-50 text-red-700 px-2.5 py-0.5 rounded-full border border-red-100">+5% vs last month</span>
+                    </div>
                 </Card>
-                <Card className="p-6 border-l-4 border-l-orange-500">
-                    <p className="text-sm font-medium text-gray-500">This Month</p>
-                    <h2 className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(thisMonthExpenses)}</h2>
-                    <p className="text-xs text-red-600 mt-1 font-medium">+5% vs last month</p>
+
+                {/* This Month Card */}
+                <Card hoverEffect className="p-6">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 mb-1">This Month</p>
+                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(thisMonthExpenses)}</h2>
+                        </div>
+                        <div className="p-3 bg-orange-50 rounded-2xl text-orange-600 shadow-sm">
+                            <Calendar className="h-6 w-6" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-center">
+                        <span className="text-xs font-semibold bg-red-50 text-red-700 px-2.5 py-0.5 rounded-full border border-red-100 flex items-center gap-1">
+                            <TrendingDown className="h-3 w-3" /> 5% increase
+                        </span>
+                    </div>
                 </Card>
-                <Card className="p-6 border-l-4 border-l-yellow-500">
-                    <p className="text-sm font-medium text-gray-500">Top Category</p>
-                    <h2 className="text-lg font-bold text-gray-900 mt-2 truncate">Rent (30%)</h2>
+
+                {/* Top Category Card */}
+                <Card hoverEffect className="p-6">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 mb-1">Top Category</p>
+                            <h2 className="text-xl font-bold text-gray-900 truncate">Rent (30%)</h2>
+                        </div>
+                        <div className="p-3 bg-gray-100 rounded-2xl text-gray-600 shadow-sm">
+                            <PieChart className="h-6 w-6" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-center">
+                        <span className="text-xs text-gray-400">Highest spending area</span>
+                    </div>
                 </Card>
             </div>
 
             {/* Content Area */}
-            <Card className="overflow-hidden border-gray-200 shadow-sm">
+            <Card className="overflow-hidden border-gray-200 shadow-sm stagger-2 animate-fade-in-up">
                 {/* Toolbar */}
-                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <div className="p-4 border-b border-gray-100 bg-gray-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
                     <div className="relative w-full sm:w-96">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search className="h-4 w-4 text-gray-400" />
@@ -212,7 +285,7 @@ export function ExpenseListPage() {
                         <input
                             type="text"
                             placeholder="Search expenses..."
-                            className="block w-full pl-10 pr-3 py-2 border-gray-200 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500 bg-white"
+                            className="block w-full pl-10 pr-3 py-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-[#DE2010] focus:border-[#DE2010] bg-white dark:bg-slate-900 dark:text-white transition-all shadow-sm"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -223,11 +296,11 @@ export function ExpenseListPage() {
                 </div>
 
                 {loading ? (
-                    <div className="p-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary-600" /></div>
+                    <div className="p-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#DE2010]" /></div>
                 ) : filteredExpenses.length === 0 ? (
                     <div className="p-16 text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-4">
-                            <TrendingDown className="h-8 w-8 text-red-500" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-4 animate-pulse">
+                            <TrendingDown className="h-8 w-8 text-[#DE2010]" />
                         </div>
                         <h3 className="text-lg font-medium text-gray-900">No expenses recorded</h3>
                         <p className="mt-2 text-gray-500 max-w-sm mx-auto">Keep track of where your money goes. Record your first expense.</p>
@@ -236,34 +309,34 @@ export function ExpenseListPage() {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50/50">
+                            <thead className="bg-gray-50/50 dark:bg-slate-800/50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categories</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Categories</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Method</th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-100">
-                                {filteredExpenses.map((expense) => (
-                                    <tr key={expense.id} className="hover:bg-gray-50/80 transition-colors">
+                            <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-100 dark:divide-gray-800">
+                                {filteredExpenses.map((expense, index) => (
+                                    <tr key={expense.id} style={{ animationDelay: `${index * 50}ms` }} className="hover:bg-red-50/20 dark:hover:bg-red-900/10 transition-colors animate-fade-in-up">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">{formatDate(expense.date)}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-[#DE2010] border border-red-100 dark:border-red-900/20">
                                                 {expense.category}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                                             {expense.description || '-'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{expense.payment_method}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-red-600 text-right">-{formatCurrency(expense.amount)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#DE2010] text-right">-{formatCurrency(expense.amount)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end space-x-3">
-                                                <button onClick={() => openModal(expense)} className="text-gray-400 hover:text-primary-600 transition-colors"><Edit className="h-4 w-4" /></button>
-                                                <button onClick={() => handleDelete(expense.id)} className="text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="h-4 w-4" /></button>
+                                                <button onClick={() => openModal(expense)} className="text-gray-400 hover:text-[#00A86B] transition-colors p-1 hover:bg-emerald-50 rounded-full"><Edit className="h-4 w-4" /></button>
+                                                <button onClick={() => handleDelete(expense.id)} className="text-gray-400 hover:text-[#DE2010] transition-colors p-1 hover:bg-red-50 rounded-full"><Trash2 className="h-4 w-4" /></button>
                                             </div>
                                         </td>
                                     </tr>

@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Plus, TrendingUp, Trash2, Edit, Loader2, Search, Filter, Download } from 'lucide-react';
+import { Plus, TrendingUp, Trash2, Edit, Loader2, Search, Filter, Download, DollarSign, Calendar, CreditCard } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { Income, Customer } from '../../types';
-import { formatCurrency, formatDate, cn } from '../../lib/utils';
+import { formatCurrency, formatDate } from '../../lib/utils';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const incomeSchema = z.object({
     date: z.string(),
@@ -164,41 +166,113 @@ export function IncomeListPage() {
         i.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const handleExport = () => {
+        const doc = new jsPDF();
+
+        // Add company info or title
+        doc.setFontSize(18);
+        doc.setTextColor(0, 168, 107); // Emerald color
+        doc.text("Income Report", 14, 22);
+
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+
+        const tableColumn = ["Date", "Description", "Customer", "Category", "Method", "Amount"];
+        const tableRows = filteredIncomes.map(income => [
+            formatDate(income.date),
+            income.description || '-',
+            income.customer?.name || '-',
+            income.category.replace('_', ' '),
+            income.payment_method,
+            formatCurrency(income.amount)
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 40,
+            headStyles: { fillColor: [0, 168, 107] }, // Emerald header
+            alternateRowStyles: { fillColor: [240, 253, 244] }, // Light emerald alternate rows
+        });
+
+        doc.save(`income_report_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-8 max-w-7xl mx-auto animate-fade-in-up duration-500">
             {/* Header Area */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Income</h1>
-                    <p className="mt-2 text-sm text-gray-500">Track and manage your revenue streams.</p>
+                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                        <span className="w-2 h-8 rounded-full bg-purple-600 block"></span>
+                        Income
+                    </h1>
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Track and manage your revenue streams effectively.</p>
                 </div>
                 <div className="flex items-center gap-3 mt-4 sm:mt-0">
-                    <Button variant="outline" leftIcon={Download}>Export</Button>
+                    <Button variant="outline" leftIcon={Download} onClick={handleExport}>Export Report</Button>
                     <Button variant="primary" leftIcon={Plus} onClick={() => openModal()}>Add Income</Button>
                 </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="p-6 border-l-4 border-l-emerald-500">
-                    <p className="text-sm font-medium text-gray-500">Total Revenue</p>
-                    <h2 className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(totalIncome)}</h2>
+            {/* Quick Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-1 animate-fade-in-up">
+                {/* Total Revenue Card */}
+                <Card hoverEffect className="p-6">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 mb-1">Total Revenue</p>
+                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(totalIncome)}</h2>
+                        </div>
+                        <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
+                            <DollarSign className="h-6 w-6" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-center">
+                        <span className="text-xs font-semibold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-100">+2.5% vs last month</span>
+                    </div>
                 </Card>
-                <Card className="p-6 border-l-4 border-l-blue-500">
-                    <p className="text-sm font-medium text-gray-500">This Month</p>
-                    <h2 className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(thisMonthIncome)}</h2>
-                    <p className="text-xs text-green-600 mt-1 font-medium">+12% vs last month</p>
+
+                {/* This Month Card */}
+                <Card hoverEffect className="p-6">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 mb-1">This Month</p>
+                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(thisMonthIncome)}</h2>
+                        </div>
+                        <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
+                            <Calendar className="h-6 w-6" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-center">
+                        <span className="text-xs font-semibold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
+                            <TrendingUp className="h-3 w-3" /> 12% increase
+                        </span>
+                    </div>
                 </Card>
-                <Card className="p-6 border-l-4 border-l-purple-500">
-                    <p className="text-sm font-medium text-gray-500">Average Transaction</p>
-                    <h2 className="text-2xl font-bold text-gray-900 mt-2">{formatCurrency(totalIncome / (incomes.length || 1))}</h2>
+
+                {/* Average Transaction Card */}
+                <Card hoverEffect className="p-6">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-sm font-medium text-gray-500 mb-1">Avg. Transaction</p>
+                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(totalIncome / (incomes.length || 1))}</h2>
+                        </div>
+                        <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 shadow-sm">
+                            <CreditCard className="h-6 w-6" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-center">
+                        <span className="text-xs text-gray-400">Per recorded transaction</span>
+                    </div>
                 </Card>
             </div>
 
             {/* Content Area */}
-            <Card className="overflow-hidden border-gray-200 shadow-sm">
+            <Card className="overflow-hidden border-gray-200 shadow-sm stagger-2 animate-fade-in-up">
                 {/* Toolbar */}
-                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <div className="p-4 border-b border-gray-100 bg-gray-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
                     <div className="relative w-full sm:w-96">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search className="h-4 w-4 text-gray-400" />
@@ -206,7 +280,7 @@ export function IncomeListPage() {
                         <input
                             type="text"
                             placeholder="Search transactions..."
-                            className="block w-full pl-10 pr-3 py-2 border-gray-200 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500 bg-white"
+                            className="block w-full pl-10 pr-3 py-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-[#00A86B] focus:border-[#00A86B] bg-white dark:bg-slate-900 dark:text-white transition-all shadow-sm"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -217,11 +291,11 @@ export function IncomeListPage() {
                 </div>
 
                 {loading ? (
-                    <div className="p-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary-600" /></div>
+                    <div className="p-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00A86B]" /></div>
                 ) : filteredIncomes.length === 0 ? (
                     <div className="p-16 text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-4">
-                            <TrendingUp className="h-8 w-8 text-emerald-500" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-4 animate-pulse">
+                            <TrendingUp className="h-8 w-8 text-[#00A86B]" />
                         </div>
                         <h3 className="text-lg font-medium text-gray-900">No income records found</h3>
                         <p className="mt-2 text-gray-500 max-w-sm mx-auto">Get started by adding your first income transaction. It will show up here.</p>
@@ -230,35 +304,35 @@ export function IncomeListPage() {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50/50">
+                            <thead className="bg-gray-50/50 dark:bg-slate-800/50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Details</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Method</th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-100">
-                                {filteredIncomes.map((income) => (
-                                    <tr key={income.id} className="hover:bg-gray-50/80 transition-colors">
+                            <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-100 dark:divide-gray-800">
+                                {filteredIncomes.map((income, index) => (
+                                    <tr key={income.id} style={{ animationDelay: `${index * 50}ms` }} className="hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-colors animate-fade-in-up">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">{formatDate(income.date)}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-900">
+                                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                             <div className="font-semibold">{income.description || 'Unspecified Income'}</div>
-                                            {income.customer && <div className="text-xs text-primary-600 mt-0.5 font-medium">{income.customer.name}</div>}
+                                            {income.customer && <div className="text-xs text-[#00A86B] mt-0.5 font-medium">{income.customer.name}</div>}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize border border-gray-200">
                                                 {income.category.replace('_', ' ')}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{income.payment_method}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600 text-right">+{formatCurrency(income.amount)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#00A86B] text-right">+{formatCurrency(income.amount)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end space-x-3">
-                                                <button onClick={() => openModal(income)} className="text-gray-400 hover:text-primary-600 transition-colors"><Edit className="h-4 w-4" /></button>
-                                                <button onClick={() => handleDelete(income.id)} className="text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="h-4 w-4" /></button>
+                                                <button onClick={() => openModal(income)} className="text-gray-400 hover:text-[#00A86B] transition-colors p-1 hover:bg-emerald-50 rounded-full"><Edit className="h-4 w-4" /></button>
+                                                <button onClick={() => handleDelete(income.id)} className="text-gray-400 hover:text-[#DE2010] transition-colors p-1 hover:bg-red-50 rounded-full"><Trash2 className="h-4 w-4" /></button>
                                             </div>
                                         </td>
                                     </tr>

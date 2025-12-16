@@ -19,6 +19,7 @@ import { ReportsPage } from './pages/reports/ReportsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 
 function App() {
+  // Application Entry Point
   return (
     <Router>
       <AuthProvider>
