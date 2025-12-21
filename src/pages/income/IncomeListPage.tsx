@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Plus, TrendingUp, Trash2, Edit, Loader2, Search, Filter, Download, DollarSign, Calendar, CreditCard } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { supabase } from '../../lib/supabase';
@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { debounce } from '../../lib/performance';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -48,33 +49,59 @@ export function IncomeListPage() {
         }
     });
 
-    useEffect(() => {
-        fetchData();
-    }, [user, profile]);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         if (!user || !profile) {
             setLoading(false);
             return;
         }
         try {
             const [incomeRes, customerRes] = await Promise.all([
-                supabase.from('income').select('*, customer:customers(name)').eq('business_id', profile.id).order('date', { ascending: false }),
-                supabase.from('customers').select('*').eq('business_id', profile.id)
+                supabase
+                    .from('income')
+                    .select('id, date, amount, category, payment_method, description, customer_id, customer:customers(name)')
+                    .eq('business_id', profile.id)
+                    .order('date', { ascending: false })
+                    .limit(100),
+                supabase
+                    .from('customers')
+                    .select('id, name')
+                    .eq('business_id', profile.id)
             ]);
 
             if (incomeRes.error) throw incomeRes.error;
             if (customerRes.error) throw customerRes.error;
 
-            setIncomes(incomeRes.data as Income[]);
-            setCustomers(customerRes.data as Customer[]);
+            setIncomes(incomeRes.data as any[]);
+            setCustomers(customerRes.data as any[]);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, profile]);
 
+    // Search and realtime refresh
+    const debouncedFetch = useMemo(
+        () => debounce(fetchData, 400),
+        [fetchData]
+    );
+
+    useEffect(() => {
+        fetchData();
+
+        // Realtime subscription
+        const channel = supabase.channel('income-list-changes')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'income', filter: `business_id=eq.${profile?.id}` },
+                () => debouncedFetch()
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [fetchData, debouncedFetch, profile?.id]);
     const onSubmit = async (data: IncomeFormData) => {
         if (!user) return;
 
@@ -87,8 +114,7 @@ export function IncomeListPage() {
             const payload = {
                 ...data,
                 customer_id: data.customer_id || null, // Handle empty string as null
-                business_id: profile.id,
-                user_id: user.id // Ensure user_id is set
+                business_id: profile.id
             };
 
             if (editingIncome) {
@@ -155,28 +181,86 @@ export function IncomeListPage() {
         reset();
     };
 
-    // Calculate totals
-    const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
-    const thisMonthIncome = incomes
-        .filter(i => i.date.startsWith(new Date().toISOString().slice(0, 7)))
-        .reduce((sum, i) => sum + i.amount, 0);
+    // Calculate totals with memoization
+    const { totalIncome, thisMonthIncome, averageTransaction } = useMemo(() => {
+        const total = incomes.reduce((sum, i) => sum + i.amount, 0);
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const thisMonth = incomes
+            .filter(i => i.date.startsWith(currentMonth))
+            .reduce((sum, i) => sum + i.amount, 0);
 
-    const filteredIncomes = incomes.filter(i =>
-        i.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        i.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+        return {
+            totalIncome: total,
+            thisMonthIncome: thisMonth,
+            averageTransaction: incomes.length > 0 ? total / incomes.length : 0
+        };
+    }, [incomes]);
+
+    const filteredIncomes = useMemo(() => {
+        return incomes.filter(i =>
+            i.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            i.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [incomes, searchTerm]);
 
     const handleExport = () => {
         const doc = new jsPDF();
 
-        // Add company info or title
-        doc.setFontSize(18);
-        doc.setTextColor(0, 168, 107); // Emerald color
+        // Header with gradient-like effect
+        doc.setFillColor(6, 78, 59); // Dark emerald
+        doc.rect(0, 0, 210, 45, 'F');
+
+        // Title
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
         doc.text("Income Report", 14, 22);
 
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+        // Subtitle
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${profile?.business_name || 'Business'}`, 14, 30);
+        doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, 14, 36);
+
+        // Summary Statistics Section
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Summary Statistics', 14, 58);
+
+        // Summary stats table
+        autoTable(doc, {
+            startY: 63,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [16, 185, 129], // Emerald 500
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 10
+            },
+            bodyStyles: {
+                fontSize: 11,
+                fontStyle: 'bold'
+            },
+            head: [['Metric', 'Value']],
+            body: [
+                ['Total Revenue', formatCurrency(totalIncome)],
+                ['This Month', formatCurrency(thisMonthIncome)],
+                ['Average Transaction', formatCurrency(totalIncome / (filteredIncomes.length || 1))],
+                ['Total Transactions', filteredIncomes.length.toString()]
+            ],
+            columnStyles: {
+                0: { cellWidth: 80, fontStyle: 'normal' },
+                1: { cellWidth: 80, halign: 'right', textColor: [6, 78, 59] }
+            }
+        });
+
+        // Detailed Transactions Section
+        const detailStartY = (doc as any).lastAutoTable.finalY + 15;
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('Transaction Details', 14, detailStartY);
 
         const tableColumn = ["Date", "Description", "Customer", "Category", "Method", "Amount"];
         const tableRows = filteredIncomes.map(income => [
@@ -184,17 +268,44 @@ export function IncomeListPage() {
             income.description || '-',
             income.customer?.name || '-',
             income.category.replace('_', ' '),
-            income.payment_method,
+            income.payment_method.toUpperCase(),
             formatCurrency(income.amount)
         ]);
 
         autoTable(doc, {
             head: [tableColumn],
             body: tableRows,
-            startY: 40,
-            headStyles: { fillColor: [0, 168, 107] }, // Emerald header
-            alternateRowStyles: { fillColor: [240, 253, 244] }, // Light emerald alternate rows
+            startY: detailStartY + 5,
+            theme: 'striped',
+            headStyles: {
+                fillColor: [16, 185, 129], // Emerald 500
+                textColor: [255, 255, 255],
+                fontStyle: 'bold'
+            },
+            alternateRowStyles: { fillColor: [240, 253, 244] },
+            columnStyles: {
+                5: { halign: 'right', textColor: [6, 78, 59], fontStyle: 'bold' }
+            },
+            foot: [[
+                { content: 'TOTAL', colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [6, 78, 59], textColor: [255, 255, 255] } },
+                { content: formatCurrency(filteredIncomes.reduce((sum, i) => sum + i.amount, 0)), styles: { halign: 'right', fontStyle: 'bold', fillColor: [6, 78, 59], textColor: [255, 255, 255] } }
+            ]],
+            footStyles: {
+                fillColor: [6, 78, 59],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold'
+            }
         });
+
+        // Footer
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text('Powered by FinFlow ZM - Financial Management System', 14, 285);
+            doc.text(`Page ${i} of ${pageCount}`, 200, 285, { align: 'right' });
+        }
 
         doc.save(`income_report_${new Date().toISOString().split('T')[0]}.pdf`);
     };
@@ -241,12 +352,12 @@ export function IncomeListPage() {
                             <p className="text-sm font-medium text-gray-500 mb-1">This Month</p>
                             <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(thisMonthIncome)}</h2>
                         </div>
-                        <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
+                        <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
                             <Calendar className="h-6 w-6" />
                         </div>
                     </div>
                     <div className="mt-4 flex items-center">
-                        <span className="text-xs font-semibold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
+                        <span className="text-xs font-semibold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-100 flex items-center gap-1">
                             <TrendingUp className="h-3 w-3" /> 12% increase
                         </span>
                     </div>
@@ -257,9 +368,9 @@ export function IncomeListPage() {
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-sm font-medium text-gray-500 mb-1">Avg. Transaction</p>
-                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(totalIncome / (incomes.length || 1))}</h2>
+                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(averageTransaction)}</h2>
                         </div>
-                        <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 shadow-sm">
+                        <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
                             <CreditCard className="h-6 w-6" />
                         </div>
                     </div>
@@ -272,30 +383,30 @@ export function IncomeListPage() {
             {/* Content Area */}
             <Card className="overflow-hidden border-gray-200 shadow-sm stagger-2 animate-fade-in-up">
                 {/* Toolbar */}
-                <div className="p-4 border-b border-gray-100 bg-gray-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <div className="relative w-full sm:w-96">
+                <div className="p-4 border-b border-gray-100 bg-gray-50/50 dark:bg-slate-800/50 flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div className="relative w-full md:w-96">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search className="h-4 w-4 text-gray-400" />
                         </div>
                         <input
                             type="text"
                             placeholder="Search transactions..."
-                            className="block w-full pl-10 pr-3 py-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-[#00A86B] focus:border-[#00A86B] bg-white dark:bg-slate-900 dark:text-white transition-all shadow-sm"
+                            className="block w-full pl-10 pr-3 py-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-[#7C3AED] focus:border-[#7C3AED] bg-white dark:bg-slate-900 dark:text-white transition-all shadow-sm"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" leftIcon={Filter}>Filter</Button>
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                        <Button variant="ghost" size="sm" leftIcon={Filter} className="flex-1 md:flex-none justify-center">Filter</Button>
                     </div>
                 </div>
 
                 {loading ? (
-                    <div className="p-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00A86B]" /></div>
+                    <div className="p-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#7C3AED]" /></div>
                 ) : filteredIncomes.length === 0 ? (
                     <div className="p-16 text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-4 animate-pulse">
-                            <TrendingUp className="h-8 w-8 text-[#00A86B]" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-50 mb-4 animate-pulse">
+                            <TrendingUp className="h-8 w-8 text-[#7C3AED]" />
                         </div>
                         <h3 className="text-lg font-medium text-gray-900">No income records found</h3>
                         <p className="mt-2 text-gray-500 max-w-sm mx-auto">Get started by adding your first income transaction. It will show up here.</p>
@@ -303,7 +414,8 @@ export function IncomeListPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
+                        {/* Desktop Table View */}
+                        <table className="hidden md:table min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50/50 dark:bg-slate-800/50">
                                 <tr>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
@@ -316,11 +428,11 @@ export function IncomeListPage() {
                             </thead>
                             <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-100 dark:divide-gray-800">
                                 {filteredIncomes.map((income, index) => (
-                                    <tr key={income.id} style={{ animationDelay: `${index * 50}ms` }} className="hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-colors animate-fade-in-up">
+                                    <tr key={income.id} style={{ animationDelay: `${index * 50}ms` }} className="hover:bg-purple-50/50 dark:hover:bg-purple-900/10 transition-colors animate-fade-in-up">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">{formatDate(income.date)}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                             <div className="font-semibold">{income.description || 'Unspecified Income'}</div>
-                                            {income.customer && <div className="text-xs text-[#00A86B] mt-0.5 font-medium">{income.customer.name}</div>}
+                                            {income.customer && <div className="text-xs text-[#7C3AED] mt-0.5 font-medium">{income.customer.name}</div>}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize border border-gray-200">
@@ -328,17 +440,67 @@ export function IncomeListPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{income.payment_method}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#00A86B] text-right">+{formatCurrency(income.amount)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#7C3AED] text-right">+{formatCurrency(income.amount)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end space-x-3">
-                                                <button onClick={() => openModal(income)} className="text-gray-400 hover:text-[#00A86B] transition-colors p-1 hover:bg-emerald-50 rounded-full"><Edit className="h-4 w-4" /></button>
-                                                <button onClick={() => handleDelete(income.id)} className="text-gray-400 hover:text-[#DE2010] transition-colors p-1 hover:bg-red-50 rounded-full"><Trash2 className="h-4 w-4" /></button>
+                                                <button onClick={() => openModal(income)} className="text-gray-400 hover:text-[#7C3AED] transition-colors p-1 hover:bg-purple-50 rounded-full"><Edit className="h-4 w-4" /></button>
+                                                <button onClick={() => handleDelete(income.id)} className="text-gray-400 hover:text-[#7C3AED] transition-colors p-1 hover:bg-purple-50 rounded-full"><Trash2 className="h-4 w-4" /></button>
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden space-y-4 p-4">
+                            {filteredIncomes.map((income, index) => (
+                                <div
+                                    key={income.id}
+                                    className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 shadow-sm animate-fade-in-up"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <p className="text-xs text-gray-500 font-medium">{formatDate(income.date)}</p>
+                                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mt-1">{income.description || 'Unspecified Income'}</h4>
+                                        </div>
+                                        <span className="font-bold text-[#7C3AED] bg-purple-50 px-2 py-1 rounded-lg text-sm">
+                                            +{formatCurrency(income.amount)}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize border border-gray-200">
+                                            {income.category.replace('_', ' ')}
+                                        </span>
+                                        <span className="text-xs text-gray-400 capitalize">• {income.payment_method}</span>
+                                    </div>
+
+                                    {income.customer && (
+                                        <div className="flex items-center gap-1 text-xs text-[#7C3AED] font-medium mb-4 bg-purple-50/50 p-2 rounded-lg">
+                                            <span>Start from:</span>
+                                            {income.customer.name}
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-end gap-2 border-t border-gray-100 pt-3">
+                                        <button
+                                            onClick={() => openModal(income)}
+                                            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-gray-600 hover:text-[#7C3AED] hover:bg-purple-50 py-2 rounded-lg transition-colors"
+                                        >
+                                            <Edit className="h-4 w-4" /> Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(income.id)}
+                                            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-purple-600 hover:bg-purple-50 py-2 rounded-lg transition-colors"
+                                        >
+                                            <Trash2 className="h-4 w-4" /> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </Card>

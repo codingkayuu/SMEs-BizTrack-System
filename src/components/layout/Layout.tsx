@@ -23,7 +23,9 @@ export function Layout() {
                     >
                         <Menu className="h-6 w-6" />
                     </button>
-                    <span className="text-lg font-bold text-gray-900">BizTrack</span>
+                    <span className="flex items-center">
+                        <img src="/FinFlow.svg" alt="FinFlow ZM" className="h-8 w-8 object-contain" />
+                    </span>
                     <div className="w-6" />
                 </header>
 

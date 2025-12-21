@@ -1,5 +1,7 @@
-import { ArrowUpRight, ArrowDownLeft, FileText } from 'lucide-react';
+import { memo, useCallback, useState } from 'react';
+import { ArrowUpRight, ArrowDownLeft, FileText, Trash2 } from 'lucide-react';
 import { cn, formatCurrency, formatDate } from '../../lib/utils';
+import { supabase } from '../../lib/supabase';
 import type { Income, Expense } from '../../types';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 
@@ -11,7 +13,28 @@ interface RecentTransactionsProps {
     loading?: boolean;
 }
 
-export function RecentTransactions({ transactions, loading }: RecentTransactionsProps) {
+export const RecentTransactions = memo(function RecentTransactions({ transactions, loading }: RecentTransactionsProps) {
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const handleDelete = useCallback(async (transaction: Transaction) => {
+        if (!confirm(`Are you sure you want to delete this ${transaction.type}?`)) return;
+
+        setDeletingId(transaction.id);
+        try {
+            const { error } = await supabase
+                .from(transaction.type === 'income' ? 'income' : 'expenses')
+                .delete()
+                .eq('id', transaction.id);
+
+            if (error) throw error;
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+            alert('Failed to delete transaction. Please try again.');
+        } finally {
+            setDeletingId(null);
+        }
+    }, []);
+
     if (loading) {
         return <Card className="h-full min-h-[400px] animate-pulse bg-gray-50 border-gray-100" />;
     }
@@ -47,7 +70,7 @@ export function RecentTransactions({ transactions, loading }: RecentTransactions
                                 <div className="flex items-center space-x-4">
                                     <div className={cn(
                                         "flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-105 shadow-sm",
-                                        tx.type === 'income' ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+                                        tx.type === 'income' ? "bg-purple-100 text-purple-700" : "bg-purple-50 text-purple-400"
                                     )}>
                                         {tx.type === 'income' ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownLeft className="h-5 w-5" />}
                                     </div>
@@ -62,11 +85,25 @@ export function RecentTransactions({ transactions, loading }: RecentTransactions
                                         </div>
                                     </div>
                                 </div>
-                                <div className={cn(
-                                    "text-sm font-bold tabular-nums",
-                                    tx.type === 'income' ? "text-emerald-600" : "text-gray-900"
-                                )}>
-                                    {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                <div className="flex items-center space-x-3">
+                                    <div className={cn(
+                                        "text-sm font-bold tabular-nums",
+                                        tx.type === 'income' ? "text-purple-700" : "text-gray-900"
+                                    )}>
+                                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                    </div>
+                                    <button
+                                        onClick={() => handleDelete(tx)}
+                                        disabled={deletingId === tx.id}
+                                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 rounded-lg hover:bg-purple-50 text-purple-500 hover:text-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title={`Delete ${tx.type}`}
+                                    >
+                                        {deletingId === tx.id ? (
+                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-purple-600 border-t-transparent" />
+                                        ) : (
+                                            <Trash2 className="h-4 w-4" />
+                                        )}
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -75,4 +112,5 @@ export function RecentTransactions({ transactions, loading }: RecentTransactions
             </CardContent>
         </Card>
     );
-}
+});
+

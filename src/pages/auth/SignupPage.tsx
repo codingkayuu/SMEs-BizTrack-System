@@ -1,82 +1,58 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock, User, Building2, Phone, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-import confetti from 'canvas-confetti';
-
-const signupSchema = z.object({
-    businessName: z.string().min(2, 'Business name is required'),
-    ownerName: z.string().min(2, 'Owner name is required'),
-    phoneNumber: z.string().min(10, 'Please enter a valid phone number'),
-    email: z.string().email('Please enter a valid email'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-type SignupFormData = z.infer<typeof signupSchema>;
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { Mail, Lock, User, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export function SignupPage() {
-    const navigate = useNavigate();
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [focusedField, setFocusedField] = useState<string | null>(null);
-
-    const {
-        register,
-        handleSubmit,
-        watch,
-        formState: { errors },
-    } = useForm<SignupFormData>({
-        resolver: zodResolver(signupSchema),
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        businessName: '',
+        fullName: '',
+        phone: '',
+        address: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+    const { signUp } = useAuth();
 
-    const password = watch('password');
-    const businessName = watch('businessName');
-
-    const getStrength = (pass: string | undefined) => {
-        if (!pass) return 0;
-        let s = 0;
-        if (pass.length > 5) s += 1;
-        if (pass.length > 8) s += 1;
-        if (/[A-Z]/.test(pass)) s += 1;
-        if (/[0-9]/.test(pass)) s += 1;
-        return s;
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    const strength = getStrength(password);
-    const strengthLabels = ["Weak 😬", "Fair 😐", "Good 🙂", "Strong 🔒", "Super! 🚀"];
-    const strengthColors = ["#E5E7EB", "#EF4444", "#F59E0B", "#22C55E", "#16A34A"];
+    const passwordStrength = (pass: string) => {
+        if (!pass) return 0;
+        let score = 0;
+        if (pass.length >= 8) score++;
+        if (/[A-Z]/.test(pass)) score++;
+        if (/[0-9]/.test(pass)) score++;
+        if (/[^A-Za-z0-9]/.test(pass)) score++;
+        return score;
+    };
 
-    const onSubmit = async (data: SignupFormData) => {
+    const strength = passwordStrength(formData.password);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
         setLoading(true);
-        setError(null);
+        setError('');
 
         try {
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email: data.email,
-                password: data.password,
+            await signUp(formData.email, formData.password, {
+                business_name: formData.businessName,
+                owner_name: formData.fullName,
+                phone: formData.phone,
+                address: formData.address
             });
-
-            if (authError) throw authError;
-
-            if (authData.user) {
-                const { error: profileError } = await supabase
-                    .from('businesses')
-                    .insert([{
-                        user_id: authData.user.id,
-                        business_name: data.businessName,
-                        owner_name: data.ownerName,
-                        phone_number: data.phoneNumber,
-                    }]);
-
-                if (!profileError) {
-                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                }
-            }
-            navigate('/');
+            navigate('/dashboard');
         } catch (err: any) {
             setError(err.message || 'Failed to create account');
         } finally {
@@ -84,346 +60,186 @@ export function SignupPage() {
         }
     };
 
-    const inputStyle = (field: string, hasError: boolean) => ({
-        width: '100%',
-        height: '56px',
-        padding: '16px 16px 8px 48px',
-        fontSize: '16px',
-        border: `2px solid ${hasError ? '#EF4444' : focusedField === field ? '#7C3AED' : '#E5E7EB'}`,
-        borderRadius: '12px',
-        outline: 'none',
-        backgroundColor: focusedField === field ? '#FFFFFF' : '#FBF7FF',
-        transition: 'all 0.2s ease',
-        boxShadow: focusedField === field ? '0 0 0 4px rgba(124, 58, 237, 0.1)' : 'none',
-        fontFamily: 'Inter, sans-serif',
-    });
-
-    const labelStyle = (field: string, hasValue: boolean) => ({
-        position: 'absolute' as const,
-        left: '48px',
-        top: hasValue || focusedField === field ? '8px' : '18px',
-        fontSize: hasValue || focusedField === field ? '12px' : '16px',
-        color: focusedField === field ? '#7C3AED' : '#6B7280',
-        transition: 'all 0.2s ease',
-        pointerEvents: 'none' as const,
-        fontWeight: focusedField === field ? 600 : 400,
-    });
-
-    const iconStyle = (field: string) => ({
-        position: 'absolute' as const,
-        left: '16px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        color: focusedField === field ? '#7C3AED' : '#9CA3AF',
-        transition: 'color 0.2s ease',
-    });
-
     return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
-        }}>
-            {/* Left Side - Hero */}
-            <div style={{
-                width: '50%',
-                background: 'linear-gradient(135deg, #4C1D95 0%, #7C3AED 100%)',
-                position: 'relative',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                padding: '48px',
-            }}>
-                {/* Hero Background Image */}
-                <img
-                    src="/auth-hero.png"
-                    alt=""
-                    style={{
-                        position: 'absolute',
-                        inset: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        opacity: 0.2,
-                        mixBlendMode: 'overlay',
-                    }}
-                />
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden py-12">
+            {/* Soft Studio Lighting Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#F3E8FF] via-[#F0E6FF] to-[#E0D4F0]" />
+            
+            {/* Matte Grain Texture Overlay */}
+            <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJub2lzZSIgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giIHJlc3VsdD0ibm9pc2UiLz48ZmVDb2xvck1hdHJpeCB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgMSAwIDAiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsdGVyPSJ1cmwoI25vaXNlKSIgb3BhY2l0eT0iMSIvPjwvc3ZnPg==')]'" />
+            
+            {/* Architectural Rings */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="ringGradient">
+                        <stop offset="0%" stopColor="white" stopOpacity="0.15" />
+                        <stop offset="100%" stopColor="white" stopOpacity="0.05" />
+                    </radialGradient>
+                </defs>
+                <circle cx="50%" cy="50%" r="180" fill="none" stroke="url(#ringGradient)" strokeWidth="1" />
+                <circle cx="50%" cy="50%" r="300" fill="none" stroke="url(#ringGradient)" strokeWidth="1" />
+                <circle cx="50%" cy="50%" r="450" fill="none" stroke="url(#ringGradient)" strokeWidth="1" />
+            </svg>
 
-                {/* Content */}
-                <div style={{ position: 'relative', zIndex: 10 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{
-                            background: 'rgba(255,255,255,0.1)',
-                            backdropFilter: 'blur(8px)',
-                            padding: '8px',
-                            borderRadius: '12px',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                        }}>
-                            <img src="/vite.svg" alt="Logo" style={{ height: '32px', width: '32px' }} />
-                        </div>
-                        <span style={{ fontSize: '20px', fontWeight: 700, color: 'white' }}>BizTrack Zambia</span>
+            <div className="relative z-10 w-full max-w-lg p-6 animate-fade-in-up">
+                {/* Brand Header */}
+                <div className="text-center mb-8">
+                    <div className="mx-auto h-16 w-16 flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform duration-300">
+                        <img src="/FinFlow.svg" alt="FinFlow ZM" className="h-16 w-16 object-contain" />
                     </div>
-                </div>
-
-                <div style={{ position: 'relative', zIndex: 10, maxWidth: '480px' }}>
-                    <h1 style={{
-                        fontSize: '48px',
-                        fontWeight: 700,
-                        color: 'white',
-                        lineHeight: 1.1,
-                        marginBottom: '24px'
-                    }}>
-                        Join 50,000+ Zambian businesses growing with us.
-                    </h1>
-                    <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.8)', marginBottom: '32px' }}>
-                        Experience the future of business management. Fast, secure, and built for growth.
-                    </p>
-                </div>
-
-                <div style={{ position: 'relative', zIndex: 10, display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    {['🚀 Boost Efficiency', '📊 Real-time Analytics', '🇿🇲 Local Compliance'].map((item) => (
-                        <div key={item} style={{
-                            background: 'rgba(255,255,255,0.1)',
-                            backdropFilter: 'blur(8px)',
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                        }}>
-                            {item}
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Right Side - Form */}
-            <div style={{
-                width: '50%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                padding: '48px 64px',
-                backgroundColor: 'white',
-                overflowY: 'auto',
-            }}>
-                <div style={{ maxWidth: '440px', margin: '0 auto', width: '100%' }}>
-                    <h2 style={{
-                        fontSize: '36px',
-                        fontWeight: 700,
-                        color: '#111827',
-                        marginBottom: '8px'
-                    }}>
-                        Start your journey.
+                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                        Start your journey
                     </h2>
-                    <p style={{ fontSize: '18px', color: '#6B7280', marginBottom: '32px' }}>
-                        Create your account in seconds.
+                    <p className="mt-2 text-sm text-gray-500">
+                        Create your FinFlow ZM account in seconds.
                     </p>
+                </div>
 
+                {/* Signup Card with Levitating Shadow */}
+                <div className="relative">
+                    <div className="absolute inset-0 bg-purple-900/10 rounded-3xl blur-xl transform translate-y-4"></div>
+                    <div className="absolute inset-0 bg-purple-400/20 rounded-3xl blur-lg transform translate-y-2"></div>
+                    <div className="relative bg-white rounded-3xl shadow-2xl border border-purple-100/50 p-8">
                     {error && (
-                        <div style={{
-                            background: '#FEF2F2',
-                            border: '1px solid #FECACA',
-                            borderRadius: '12px',
-                            padding: '16px',
-                            marginBottom: '24px',
-                        }}>
-                            <p style={{ color: '#DC2626', fontSize: '14px', margin: 0 }}>{error}</p>
+                        <div className="mb-6 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center shadow-sm">
+                            <span className="mr-2">⚠️</span> {error}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        {/* Business Name */}
-                        <div style={{ position: 'relative', marginBottom: '20px' }}>
-                            <Building2 size={20} style={iconStyle('businessName')} />
-                            <input
-                                {...register('businessName')}
-                                style={inputStyle('businessName', !!errors.businessName)}
-                                onFocus={() => setFocusedField('businessName')}
-                                onBlur={() => setFocusedField(null)}
-                                placeholder=" "
-                            />
-                            <label style={labelStyle('businessName', !!businessName)}>Business Name</label>
-                            {errors.businessName && (
-                                <p style={{ color: '#EF4444', fontSize: '12px', marginTop: '4px' }}>
-                                    {errors.businessName.message}
-                                </p>
-                            )}
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                            <div className="space-y-1">
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Business Name</label>
+                                <input
+                                    name="businessName"
+                                    required
+                                    value={formData.businessName}
+                                    onChange={handleChange}
+                                    className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all sm:text-sm"
+                                    placeholder="Company Ltd"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Owner Name</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <User className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                    <input
+                                        name="fullName"
+                                        required
+                                        value={formData.fullName}
+                                        onChange={handleChange}
+                                        className="block w-full pl-9 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all sm:text-sm"
+                                        placeholder="John Doe"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Business Name Feedback */}
-                        {businessName && businessName.length > 2 && (
-                            <div style={{
-                                background: '#F5F3FF',
-                                padding: '12px 16px',
-                                borderRadius: '8px',
-                                marginBottom: '20px',
-                                marginTop: '-12px',
-                            }}>
-                                <p style={{ color: '#7C3AED', fontSize: '14px', margin: 0, fontWeight: 500 }}>
-                                    ✨ Nice! <strong>{businessName}</strong> sounds professional.
-                                </p>
+                        <div className="space-y-1">
+                            <label className="text-sm font-semibold text-gray-700 ml-1">Email Address</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Mail className="h-4 w-4 text-gray-400" />
+                                </div>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    required
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="block w-full pl-9 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all sm:text-sm"
+                                    placeholder="name@company.com"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                            <div className="space-y-1">
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Password</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Lock className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        required
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        className="block w-full pl-9 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all sm:text-sm"
+                                        placeholder="Min 8 chars"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-[#7C3AED] focus:outline-none transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Confirm Password</label>
+                                <div className="relative">
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        name="confirmPassword"
+                                        required
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        className="block w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all sm:text-sm"
+                                        placeholder="Repeat password"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-[#7C3AED] focus:outline-none transition-colors"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Password Strength Indicator */}
+                        {formData.password && (
+                            <div className="flex gap-2">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? 'bg-gradient-to-r from-[#7C3AED] to-[#C084FC]' : 'bg-gray-100'}`} />
+                                ))}
                             </div>
                         )}
 
-                        {/* Owner Name & Phone Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-                            <div style={{ position: 'relative' }}>
-                                <User size={20} style={iconStyle('ownerName')} />
-                                <input
-                                    {...register('ownerName')}
-                                    style={inputStyle('ownerName', !!errors.ownerName)}
-                                    onFocus={() => setFocusedField('ownerName')}
-                                    onBlur={() => setFocusedField(null)}
-                                    placeholder=" "
-                                />
-                                <label style={labelStyle('ownerName', !!watch('ownerName'))}>Owner Name</label>
-                            </div>
-                            <div style={{ position: 'relative' }}>
-                                <Phone size={20} style={iconStyle('phoneNumber')} />
-                                <input
-                                    {...register('phoneNumber')}
-                                    style={inputStyle('phoneNumber', !!errors.phoneNumber)}
-                                    onFocus={() => setFocusedField('phoneNumber')}
-                                    onBlur={() => setFocusedField(null)}
-                                    placeholder=" "
-                                />
-                                <label style={labelStyle('phoneNumber', !!watch('phoneNumber'))}>Phone Number</label>
-                            </div>
-                        </div>
-
-                        {/* Email */}
-                        <div style={{ position: 'relative', marginBottom: '20px' }}>
-                            <Mail size={20} style={iconStyle('email')} />
-                            <input
-                                {...register('email')}
-                                type="email"
-                                style={inputStyle('email', !!errors.email)}
-                                onFocus={() => setFocusedField('email')}
-                                onBlur={() => setFocusedField(null)}
-                                placeholder=" "
-                            />
-                            <label style={labelStyle('email', !!watch('email'))}>Email address</label>
-                        </div>
-
-                        {/* Password */}
-                        <div style={{ position: 'relative', marginBottom: '8px' }}>
-                            <Lock size={20} style={iconStyle('password')} />
-                            <input
-                                {...register('password')}
-                                type={showPassword ? 'text' : 'password'}
-                                style={{ ...inputStyle('password', !!errors.password), paddingRight: '48px' }}
-                                onFocus={() => setFocusedField('password')}
-                                onBlur={() => setFocusedField(null)}
-                                placeholder=" "
-                            />
-                            <label style={labelStyle('password', !!password)}>Password</label>
+                        <div className="pt-2">
                             <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                style={{
-                                    position: 'absolute',
-                                    right: '16px',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    color: '#9CA3AF',
-                                }}
+                                type="submit"
+                                disabled={loading}
+                                className="w-full flex items-center justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg shadow-purple-200 text-sm font-bold text-white bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] hover:from-[#6D28D9] hover:to-[#5B21B6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7C3AED] disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 transform active:scale-[0.98]"
                             >
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                {loading ? (
+                                    <Loader2 className="animate-spin h-5 w-5" />
+                                ) : (
+                                    <>
+                                        Create Account <ArrowRight className="ml-2 h-4 w-4" />
+                                    </>
+                                )}
                             </button>
                         </div>
-
-                        {/* Password Strength */}
-                        {password && password.length > 0 && (
-                            <div style={{ marginBottom: '24px' }}>
-                                <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
-                                    {[1, 2, 3, 4].map((step) => (
-                                        <div
-                                            key={step}
-                                            style={{
-                                                flex: 1,
-                                                height: '6px',
-                                                borderRadius: '3px',
-                                                backgroundColor: strength >= step ? strengthColors[strength] : '#E5E7EB',
-                                                transition: 'all 0.3s ease',
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                                <p style={{
-                                    textAlign: 'right',
-                                    fontSize: '12px',
-                                    fontWeight: 500,
-                                    color: strength < 2 ? '#EF4444' : strength < 3 ? '#F59E0B' : '#16A34A',
-                                }}>
-                                    {strengthLabels[strength]}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            style={{
-                                width: '100%',
-                                height: '56px',
-                                background: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '12px',
-                                fontSize: '16px',
-                                fontWeight: 600,
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px',
-                                boxShadow: '0 8px 24px rgba(124, 58, 237, 0.3)',
-                                transition: 'all 0.2s ease',
-                                opacity: loading ? 0.7 : 1,
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!loading) e.currentTarget.style.transform = 'translateY(-2px)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                            }}
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
-                                    Creating account...
-                                </>
-                            ) : (
-                                <>
-                                    Create Account
-                                    <ArrowRight size={20} />
-                                </>
-                            )}
-                        </button>
                     </form>
 
-                    <p style={{ textAlign: 'center', marginTop: '32px', color: '#6B7280' }}>
-                        Already have an account?{' '}
-                        <Link to="/login" style={{ color: '#7C3AED', fontWeight: 600, textDecoration: 'none' }}>
-                            Sign in
-                        </Link>
-                    </p>
+                    <div className="mt-8 text-center">
+                        <p className="text-sm text-gray-500">
+                            Already have an account?{' '}
+                            <Link to="/login" className="font-bold text-[#7C3AED] hover:text-[#6D28D9] transition-colors">
+                                Sign in here
+                            </Link>
+                        </p>
+                    </div>
+                </div>
                 </div>
             </div>
-
-            <style>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
         </div>
     );
 }

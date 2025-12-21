@@ -82,7 +82,7 @@ export function InvoiceListPage() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-purple-100 dark:border-gray-700 flex flex-col sm:flex-row gap-4 stagger-1 animate-fade-in-up">
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-purple-100 dark:border-gray-700 flex flex-col md:flex-row gap-4 stagger-1 animate-fade-in-up">
                 <div className="flex-1 relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Search className="h-5 w-5 text-gray-400" />
@@ -95,7 +95,7 @@ export function InvoiceListPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="sm:w-48">
+                <div className="w-full md:w-48">
                     <select
                         className="block w-full border-gray-200 dark:border-gray-700 rounded-xl focus:ring-[#7C3AED] focus:border-[#7C3AED] bg-white dark:bg-slate-900 sm:text-sm py-2.5"
                         value={statusFilter}
@@ -126,7 +126,7 @@ export function InvoiceListPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-purple-100 dark:divide-gray-700">
+                        <table className="hidden md:table min-w-full divide-y divide-purple-100 dark:divide-gray-700">
                             <thead className="bg-purple-50/50 dark:bg-slate-800/50">
                                 <tr>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoice #</th>
@@ -178,6 +178,59 @@ export function InvoiceListPage() {
                                 ))}
                             </tbody>
                         </table>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden space-y-4 p-4">
+                            {filteredInvoices.map((invoice, index) => (
+                                <div
+                                    key={invoice.id}
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                    className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 shadow-sm animate-fade-in-up"
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={cn(
+                                                    "px-2 py-0.5 inline-flex text-xs leading-4 font-bold rounded-full border",
+                                                    invoice.status === 'paid' ? 'bg-[#7C3AED]/10 text-[#7C3AED] border-[#7C3AED]/20' :
+                                                        invoice.status === 'unpaid' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20' :
+                                                            'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20'
+                                                )}>
+                                                    {invoice.status.toUpperCase()}
+                                                </span>
+                                                <span className="text-xs text-gray-500">{formatDate(invoice.date)}</span>
+                                            </div>
+                                            <Link to={`/invoices/${invoice.id}`} className="block font-bold text-[#7C3AED] mt-1 hover:underline">
+                                                {invoice.invoice_number}
+                                            </Link>
+                                            <p className="text-sm text-gray-900 dark:text-gray-200 font-medium">
+                                                {invoice.customer?.name || 'Unknown'}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="block text-lg font-bold text-gray-900 dark:text-white">
+                                                {formatCurrency(invoice.total_amount)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end gap-3 border-t border-gray-100 pt-3 mt-3">
+                                        <button
+                                            onClick={() => generatePDF(invoice)}
+                                            className="flex items-center gap-1 text-xs text-gray-500 hover:text-[#7C3AED] transition-colors"
+                                        >
+                                            <Download className="h-4 w-4" /> PDF
+                                        </button>
+                                        <Link
+                                            to={`/invoices/${invoice.id}`}
+                                            className="flex items-center gap-1 text-xs font-medium text-[#7C3AED] hover:text-[#6D28D9] transition-colors"
+                                        >
+                                            View Details &rarr;
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>

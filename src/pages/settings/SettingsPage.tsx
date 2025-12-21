@@ -199,8 +199,8 @@ export function SettingsPage() {
 
                             <Card className="p-8 border-purple-100 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-8 flex items-center">
-                                    <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg mr-3">
-                                        <Building className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg mr-3">
+                                        <Building className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                                     </div>
                                     Business Information
                                 </h3>
@@ -271,8 +271,8 @@ export function SettingsPage() {
                         <div className="space-y-6 animate-in fade-in duration-300 slide-in-from-bottom-2">
                             <Card className="p-8 border-purple-100 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                                    <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg mr-3">
-                                        <Palette className="h-5 w-5 text-orange-600" />
+                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg mr-3">
+                                        <Palette className="h-5 w-5 text-purple-600" />
                                     </div>
                                     Theme Settings
                                 </h3>
@@ -310,8 +310,8 @@ export function SettingsPage() {
                         <div className="space-y-6 animate-in fade-in duration-300 slide-in-from-bottom-2">
                             <Card className="p-8 border-purple-100 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg mr-3">
-                                        <Shield className="h-5 w-5 text-red-600" />
+                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg mr-3">
+                                        <Shield className="h-5 w-5 text-purple-600" />
                                     </div>
                                     Change Password
                                 </h3>
@@ -361,7 +361,7 @@ export function SettingsPage() {
                                             variant="primary"
                                             isLoading={passwordSubmitting}
                                             leftIcon={Lock}
-                                            className="w-full bg-red-600 hover:bg-red-700 border-none shadow-lg shadow-red-500/20 py-3 rounded-xl"
+                                            className="w-full bg-purple-600 hover:bg-purple-700 border-none shadow-lg shadow-purple-500/20 py-3 rounded-xl"
                                         >
                                             Update Password
                                         </Button>

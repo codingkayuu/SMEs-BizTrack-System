@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { SignupPage } from './pages/auth/SignupPage';
+import { LandingPage } from './pages/LandingPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 
 import { InvoiceListPage } from './pages/invoices/InvoiceListPage';
@@ -14,7 +15,6 @@ import { CustomerListPage } from './pages/customers/CustomerListPage';
 import { IncomeListPage } from './pages/income/IncomeListPage';
 import { ExpenseListPage } from './pages/expenses/ExpenseListPage';
 
-// Placeholder pages for routing structure
 import { ReportsPage } from './pages/reports/ReportsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 
@@ -31,13 +31,14 @@ function App() {
           )}
           <Routes>
             {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
 
             {/* Protected Routes (Wrapped in Layout) */}
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
-                <Route path="/" element={<DashboardPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/invoices" element={<InvoiceListPage />} />
                 <Route path="/invoices/new" element={<InvoiceFormPage />} />
                 <Route path="/invoices/:id" element={<InvoiceFormPage />} />

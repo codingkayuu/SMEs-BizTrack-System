@@ -1,381 +1,194 @@
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-
-const loginSchema = z.object({
-    email: z.string().email('Please enter a valid email'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
-import { useToast } from '../../contexts/ToastContext';
-
-// ...
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff, Wifi, WifiOff } from 'lucide-react';
 
 export function LoginPage() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { success, error: toastError } = useToast();
-    const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [focusedField, setFocusedField] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const navigate = useNavigate();
+    const { signIn } = useAuth();
 
-    const from = location.state?.from?.pathname || '/';
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
-    const {
-        register,
-        handleSubmit,
-        watch,
-        formState: { errors },
-    } = useForm<LoginFormData>({
-        resolver: zodResolver(loginSchema),
-    });
-
-    const onSubmit = async (data: LoginFormData) => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         setLoading(true);
+        setError('');
 
         try {
-            const { error: authError } = await supabase.auth.signInWithPassword({
-                email: data.email,
-                password: data.password,
-            });
-
-            if (authError) throw authError;
-            success('Successfully logged in!');
-            navigate(from, { replace: true });
+            await signIn(email, password);
+            navigate('/dashboard');
         } catch (err: any) {
-            toastError(err.message || 'Failed to sign in');
+            setError(err.message || 'Failed to sign in');
         } finally {
             setLoading(false);
         }
     };
 
-    const email = watch('email');
-    const password = watch('password');
-
-    const inputStyle = (field: string, hasError: boolean) => ({
-        width: '100%',
-        height: '56px',
-        padding: '16px 16px 8px 48px',
-        fontSize: '16px',
-        border: `2px solid ${hasError ? '#EF4444' : focusedField === field ? '#7C3AED' : '#E5E7EB'}`,
-        borderRadius: '12px',
-        outline: 'none',
-        backgroundColor: focusedField === field ? '#FFFFFF' : '#FBF7FF',
-        transition: 'all 0.2s ease',
-        boxShadow: focusedField === field ? '0 0 0 4px rgba(124, 58, 237, 0.1)' : 'none',
-        fontFamily: 'Inter, sans-serif',
-    });
-
-    const labelStyle = (field: string, hasValue: boolean) => ({
-        position: 'absolute' as const,
-        left: '48px',
-        top: hasValue || focusedField === field ? '8px' : '18px',
-        fontSize: hasValue || focusedField === field ? '12px' : '16px',
-        color: focusedField === field ? '#7C3AED' : '#6B7280',
-        transition: 'all 0.2s ease',
-        pointerEvents: 'none' as const,
-        fontWeight: focusedField === field ? 600 : 400,
-    });
-
-    const iconStyle = (field: string) => ({
-        position: 'absolute' as const,
-        left: '16px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        color: focusedField === field ? '#7C3AED' : '#9CA3AF',
-        transition: 'color 0.2s ease',
-    });
-
     return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
-        }}>
-            {/* Left Side - Hero */}
-            <div style={{
-                width: '50%',
-                background: 'linear-gradient(135deg, #4C1D95 0%, #7C3AED 100%)',
-                position: 'relative',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                padding: '48px',
-            }}>
-                <img
-                    src="/auth-hero.png"
-                    alt=""
-                    style={{
-                        position: 'absolute',
-                        inset: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        opacity: 0.2, // Reduced opacity for better text contrast
-                        mixBlendMode: 'overlay',
-                    }}
-                />
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+            {/* Soft Studio Lighting Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#F3E8FF] via-[#F0E6FF] to-[#E0D4F0]" />
+            
+            {/* Matte Grain Texture Overlay */}
+            <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJub2lzZSIgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giIHJlc3VsdD0ibm9pc2UiLz48ZmVDb2xvck1hdHJpeCB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgMSAwIDAgMCAwIDAgMSAwIDAiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsdGVyPSJ1cmwoI25vaXNlKSIgb3BhY2l0eT0iMSIvPjwvc3ZnPg==')]" />
+            
+            {/* Architectural Rings */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="ringGradient">
+                        <stop offset="0%" stopColor="white" stopOpacity="0.15" />
+                        <stop offset="100%" stopColor="white" stopOpacity="0.05" />
+                    </radialGradient>
+                </defs>
+                <circle cx="50%" cy="50%" r="150" fill="none" stroke="url(#ringGradient)" strokeWidth="1" />
+                <circle cx="50%" cy="50%" r="250" fill="none" stroke="url(#ringGradient)" strokeWidth="1" />
+                <circle cx="50%" cy="50%" r="400" fill="none" stroke="url(#ringGradient)" strokeWidth="1" />
+            </svg>
 
-                <div style={{ position: 'relative', zIndex: 10 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{
-                            background: 'rgba(255,255,255,0.1)',
-                            backdropFilter: 'blur(8px)',
-                            padding: '8px',
-                            borderRadius: '12px',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                        }}>
-                            <img src="/vite.svg" alt="Logo" style={{ height: '32px', width: '32px' }} />
-                        </div>
-                        <span style={{ fontSize: '20px', fontWeight: 700, color: 'white' }}>BizTrack Zambia</span>
+            <div className="relative z-10 w-full max-w-md p-6 animate-fade-in-up">
+                {/* Brand Header */}
+                <div className="text-center mb-8">
+                    <div className="mx-auto h-16 w-16 flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform duration-300">
+                        <img src="/FinFlow.svg" alt="FinFlow ZM" className="h-16 w-16 object-contain" />
                     </div>
-                </div>
-
-                <div style={{ position: 'relative', zIndex: 10, maxWidth: '480px' }}>
-                    {/* Star Rating */}
-                    <div style={{ display: 'flex', gap: '4px', marginBottom: '24px' }}>
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <svg key={i} style={{ width: '20px', height: '20px', fill: '#F59E0B' }} viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                        ))}
-                    </div>
-                    <blockquote style={{
-                        fontSize: '32px',
-                        fontWeight: 500,
-                        color: 'white',
-                        lineHeight: 1.3,
-                        marginBottom: '24px'
-                    }}>
-                        "Simple, elegant, and powerful. Exactly what my business needed."
-                    </blockquote>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{
-                            width: '48px',
-                            height: '48px',
-                            borderRadius: '50%',
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontSize: '18px',
-                            fontWeight: 700,
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                        }}>
-                            MK
-                        </div>
-                        <div>
-                            <div style={{ fontWeight: 600, color: 'white' }}>Mulenga Kapwepwe</div>
-                            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>CEO, Lusaka Logistics</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style={{ position: 'relative', zIndex: 10, display: 'flex', gap: '24px' }}>
-                    {[
-                        { icon: <CheckCircle2 size={16} />, text: 'Secure' },
-                        { icon: <CheckCircle2 size={16} />, text: 'Elegant' },
-                        { icon: <CheckCircle2 size={16} />, text: 'Reliable' },
-                    ].map((item) => (
-                        <span key={item.text} style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            color: 'rgba(255,255,255,0.8)',
-                            fontSize: '14px',
-                        }}>
-                            <span style={{ color: '#C084FC' }}>{item.icon}</span>
-                            {item.text}
-                        </span>
-                    ))}
-                </div>
-            </div>
-
-            {/* Right Side - Form */}
-            <div style={{
-                width: '50%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                padding: '48px 64px',
-                backgroundColor: 'white',
-            }}>
-                <div style={{ maxWidth: '400px', margin: '0 auto', width: '100%' }}>
-                    <h2 style={{
-                        fontSize: '36px',
-                        fontWeight: 700,
-                        color: '#111827',
-                        marginBottom: '8px'
-                    }}>
-                        Welcome back!
+                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900 tracking-tight">
+                        Welcome Back
                     </h2>
-                    <p style={{ fontSize: '18px', color: '#6B7280', marginBottom: '40px' }}>
-                        Access your elegant workspace.
+                    <p className="mt-2 text-sm text-gray-500">
+                        Sign in to continue to FinFlow ZM
                     </p>
+                </div>
 
-                    {/* Toast handles errors now */}
-
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        {/* Email */}
-                        <div style={{ position: 'relative', marginBottom: '20px' }}>
-                            <Mail size={20} style={iconStyle('email')} />
-                            <input
-                                {...register('email')}
-                                type="email"
-                                style={inputStyle('email', !!errors.email)}
-                                onFocus={() => setFocusedField('email')}
-                                onBlur={() => setFocusedField(null)}
-                                placeholder=" "
-                            />
-                            <label style={labelStyle('email', !!email)}>Email address</label>
+                {/* Login Card with Levitating Shadow */}
+                <div className="relative">
+                    {/* Offline Indicator */}
+                    {!isOnline && (
+                        <div className="absolute -top-12 left-0 right-0 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-lg text-sm flex items-center justify-center shadow-sm">
+                            <WifiOff className="h-4 w-4 mr-2" />
+                            You're offline. Please check your internet connection.
                         </div>
-
-                        {/* Password */}
-                        <div style={{ position: 'relative', marginBottom: '20px' }}>
-                            <Lock size={20} style={iconStyle('password')} />
-                            <input
-                                {...register('password')}
-                                type={showPassword ? 'text' : 'password'}
-                                style={{ ...inputStyle('password', !!errors.password), paddingRight: '48px' }}
-                                onFocus={() => setFocusedField('password')}
-                                onBlur={() => setFocusedField(null)}
-                                placeholder=" "
-                            />
-                            <label style={labelStyle('password', !!password)}>Password</label>
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                style={{
-                                    position: 'absolute',
-                                    right: '16px',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    color: '#9CA3AF',
-                                }}
-                            >
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
+                    )}
+                    
+                    <div className="absolute inset-0 bg-purple-900/10 rounded-3xl blur-xl transform translate-y-4"></div>
+                    <div className="absolute inset-0 bg-purple-400/20 rounded-3xl blur-lg transform translate-y-2"></div>
+                    <div className="relative bg-white rounded-3xl shadow-2xl border border-purple-100/50 p-8">
+                    {error && (
+                        <div className="mb-6 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center shadow-sm">
+                            <span className="mr-2">⚠️</span> {error}
                         </div>
+                    )}
 
-                        {/* Remember & Forgot */}
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '24px',
-                        }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-700 ml-1">Email Address</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[#7C3AED] transition-colors" />
+                                </div>
                                 <input
-                                    type="checkbox"
-                                    style={{
-                                        width: '16px',
-                                        height: '16px',
-                                        accentColor: '#7C3AED',
-                                        cursor: 'pointer',
-                                    }}
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all duration-200 sm:text-sm shadow-sm"
+                                    placeholder="name@company.com"
                                 />
-                                <span style={{ fontSize: '14px', color: '#374151' }}>Remember me</span>
-                            </label>
-                            <a href="#" style={{ fontSize: '14px', color: '#7C3AED', fontWeight: 600, textDecoration: 'none' }}>
-                                Forgot password?
-                            </a>
+                            </div>
                         </div>
 
-                        {/* Submit Button */}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Password</label>
+                                <a href="#" className="text-sm font-medium text-[#7C3AED] hover:text-[#6D28D9] transition-colors">
+                                    Forgot password?
+                                </a>
+                            </div>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-[#7C3AED] transition-colors" />
+                                </div>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="block w-full pl-11 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all duration-200 sm:text-sm shadow-sm"
+                                    placeholder="••••••••"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-[#7C3AED] focus:outline-none transition-colors"
+                                >
+                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                </button>
+                            </div>
+                        </div>
+
                         <button
                             type="submit"
-                            disabled={loading}
-                            style={{
-                                width: '100%',
-                                height: '56px',
-                                background: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '12px',
-                                fontSize: '16px',
-                                fontWeight: 600,
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px',
-                                boxShadow: '0 8px 24px rgba(124, 58, 237, 0.3)',
-                                transition: 'all 0.2s ease',
-                                opacity: loading ? 0.7 : 1,
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!loading) e.currentTarget.style.transform = 'translateY(-2px)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                            }}
+                            disabled={loading || !isOnline}
+                            className="w-full flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-purple-200 text-sm font-bold text-white bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] hover:from-[#6D28D9] hover:to-[#5B21B6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7C3AED] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform active:scale-[0.98]"
                         >
                             {loading ? (
                                 <>
-                                    <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
+                                    <Loader2 className="animate-spin h-5 w-5 mr-2" />
                                     Signing in...
+                                </>
+                            ) : !isOnline ? (
+                                <>
+                                    <WifiOff className="h-5 w-5 mr-2" />
+                                    Offline
                                 </>
                             ) : (
                                 <>
-                                    Sign in
-                                    <ArrowRight size={20} />
+                                    Sign In <ArrowRight className="ml-2 h-4 w-4" />
                                 </>
                             )}
                         </button>
                     </form>
 
-                    {/* Divider */}
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        margin: '32px 0',
-                        gap: '16px',
-                    }}>
-                        <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E7EB' }} />
-                        <span style={{ fontSize: '14px', color: '#9CA3AF' }}>New here?</span>
-                        <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E7EB' }} />
+                    <div className="mt-8 text-center">
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-4 bg-white/90 text-gray-500">Don't have an account?</span>
+                            </div>
+                        </div>
+                        <Link
+                            to="/signup"
+                            className="mt-6 inline-flex items-center justify-center w-full px-4 py-3.5 border border-purple-100 rounded-xl shadow-sm text-sm font-bold text-[#7C3AED] bg-purple-50 hover:bg-purple-100 hover:border-purple-200 transition-all duration-200"
+                        >
+                            Create free account
+                        </Link>
                     </div>
-
-                    {/* Create Account Link */}
-                    <Link
-                        to="/signup"
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '100%',
-                            height: '48px',
-                            border: '2px solid #E5E7EB',
-                            borderRadius: '12px',
-                            color: '#374151',
-                            fontSize: '16px',
-                            fontWeight: 500,
-                            textDecoration: 'none',
-                            transition: 'all 0.2s ease',
-                        }}
-                    >
-                        Create your account
-                    </Link>
                 </div>
-            </div>
+                </div>
 
-            <style>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
+                {/* Footer */}
+                <p className="mt-8 text-center text-xs text-gray-400">
+                    &copy; {new Date().getFullYear()} FinFlow ZM Zambia. All rights reserved.
+                </p>
+            </div>
         </div>
     );
 }

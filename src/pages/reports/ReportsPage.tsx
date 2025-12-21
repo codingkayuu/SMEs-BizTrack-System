@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { Download, Loader2, Lightbulb, Calendar, TrendingUp, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -9,9 +9,10 @@ import { ReportsChart } from './ReportsChart';
 import { CategoryBreakdownChart } from './CategoryBreakdownChart';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { debounce } from '../../lib/performance';
 
-// Colors for pie chart
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+// Colors for pie chart - maintaining pale purple theme
+const COLORS = ['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE'];
 
 type DateRangeOption = 'daily' | 'week' | 'month' | '3months' | '6months' | 'year';
 
@@ -47,12 +48,8 @@ export function ReportsPage() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    useEffect(() => {
-        fetchReportData();
-    }, [user, dateRange]);
-
-    const fetchReportData = async () => {
-        if (!user) return;
+    const fetchReportData = useCallback(async () => {
+        if (!user || !profile) return;
         setLoading(true);
         try {
             // Determine start date based on range
@@ -83,8 +80,14 @@ export function ReportsPage() {
             const startStr = startDate.toISOString();
 
             const [incomeRes, expenseRes] = await Promise.all([
-                supabase.from('income').select('amount, date').eq('user_id', user.id).gte('date', startStr),
-                supabase.from('expenses').select('amount, date, category').eq('user_id', user.id).gte('date', startStr)
+                supabase.from('income')
+                    .select('amount, date')
+                    .eq('business_id', profile.id)
+                    .gte('date', startStr),
+                supabase.from('expenses')
+                    .select('amount, date, category')
+                    .eq('business_id', profile.id)
+                    .gte('date', startStr)
             ]);
 
             const incomes = incomeRes.data || [];
@@ -96,20 +99,15 @@ export function ReportsPage() {
             const netProfit = totalIncome - totalExpense;
 
             // Grouping Logic
-            // For 'daily' or 'week', grouping by day makes more sense than month.
-            // For 'month' and above, grouping by month is standard.
-
             const isDailyView = dateRange === 'daily' || dateRange === 'week';
-
             let groupedData = [];
 
             if (isDailyView) {
-                // Group by Day
                 const days = [];
                 const d = new Date(startDate);
                 const endDate = new Date();
                 while (d <= endDate) {
-                    days.push(d.toISOString().slice(0, 10)); // YYYY-MM-DD
+                    days.push(d.toISOString().slice(0, 10));
                     d.setDate(d.getDate() + 1);
                 }
 
@@ -125,14 +123,13 @@ export function ReportsPage() {
                     };
                 });
             } else {
-                // Group by Month
                 const months = [];
                 const d = new Date(startDate);
-                d.setDate(1); // align to start of month
+                d.setDate(1);
                 const endDate = new Date();
 
                 while (d <= endDate) {
-                    months.push(d.toISOString().slice(0, 7)); // YYYY-MM
+                    months.push(d.toISOString().slice(0, 7));
                     d.setMonth(d.getMonth() + 1);
                 }
 
@@ -149,7 +146,6 @@ export function ReportsPage() {
                 });
             }
 
-            // Category Breakdown
             const categoryMap = new Map<string, number>();
             expenses.forEach(e => {
                 const cat = e.category || 'Other';
@@ -157,7 +153,7 @@ export function ReportsPage() {
             });
 
             const categoryData = Array.from(categoryMap.entries()).map(([name, value], index) => ({
-                name: name.charAt(0).toUpperCase() + name.slice(1),
+                name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
                 value,
                 color: COLORS[index % COLORS.length]
             })).sort((a, b) => b.value - a.value);
@@ -173,66 +169,112 @@ export function ReportsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, profile, dateRange]);
+
+    useEffect(() => {
+        fetchReportData();
+    }, [fetchReportData]);
+
+    // Realtime subscription logic
+    const fetchDebounced = useMemo(
+        () => debounce(fetchReportData, 500),
+        [fetchReportData]
+    );
+
+    useEffect(() => {
+        if (!profile?.id) return;
+
+        const incomeSubscription = supabase.channel('reports-income')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'income', filter: `business_id=eq.${profile.id}` }, () => fetchDebounced())
+            .subscribe();
+
+        const expenseSubscription = supabase.channel('reports-expenses')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses', filter: `business_id=eq.${profile.id}` }, () => fetchDebounced())
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(incomeSubscription);
+            supabase.removeChannel(expenseSubscription);
+        };
+    }, [profile?.id, fetchDebounced]);
 
     const downloadPDF = () => {
         if (!profile) return;
         const doc = new jsPDF();
 
-        // Header
-        doc.setFillColor(6, 78, 59); // Emerald 900
-        doc.rect(0, 0, 210, 40, 'F');
+        // Header - Theme Harmonized (Purple)
+        doc.setFillColor(124, 58, 237); // Purple 600
+        doc.rect(0, 0, 210, 45, 'F');
 
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(22);
-        doc.text('Financial Report', 14, 25);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Financial Statement', 14, 25);
 
         doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
         doc.text(profile.business_name, 200, 20, { align: 'right' });
-        doc.text(`Generated: ${new Date().toLocaleDateString()}`, 200, 28, { align: 'right' });
+        doc.text(`Period View: ${rangeLabels[dateRange]}`, 200, 28, { align: 'right' });
+        doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, 200, 36, { align: 'right' });
 
         // Summary Section
-        doc.setTextColor(0, 0, 0);
+        doc.setTextColor(31, 41, 55); // Gray 800
         doc.setFontSize(14);
-        doc.text('Executive Summary', 14, 55);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Performance Summary', 14, 60);
 
         autoTable(doc, {
-            startY: 60,
+            startY: 65,
             theme: 'grid',
-            headStyles: { fillColor: [6, 78, 59] },
-            head: [['Total Income', 'Total Expenses', 'Net Profit']],
-            body: [[
-                formatCurrency(reportData.summary.totalIncome),
-                formatCurrency(reportData.summary.totalExpense),
-                formatCurrency(reportData.summary.netProfit)
-            ]],
+            headStyles: {
+                fillColor: [124, 58, 237],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold'
+            },
+            bodyStyles: { fontStyle: 'bold' },
+            head: [['Indicator', 'Amount (ZMW)']],
+            body: [
+                ['Total Revenue', formatCurrency(reportData.summary.totalIncome)],
+                ['Total Operational Costs', formatCurrency(reportData.summary.totalExpense)],
+                ['Net Surplus / (Deficit)', formatCurrency(reportData.summary.netProfit)]
+            ],
+            columnStyles: {
+                0: { cellWidth: 100 },
+                1: { halign: 'right', textColor: [67, 56, 202] }
+            }
         });
 
-        // Monthly Breakdown
-        doc.text('Period Breakdown', 14, (doc as any).lastAutoTable.finalY + 15);
+        // Period Breakdown
+        const tableStartY = (doc as any).lastAutoTable.finalY + 15;
+        doc.text('Transactions Period Breakdown', 14, tableStartY);
         autoTable(doc, {
-            startY: (doc as any).lastAutoTable.finalY + 20,
+            startY: tableStartY + 5,
             theme: 'striped',
-            headStyles: { fillColor: [52, 211, 153] }, // Emerald 400
-            head: [['Period', 'Income', 'Expenses', 'Profit']],
+            headStyles: { fillColor: [139, 92, 246] }, // Violet 500
+            head: [['Period', 'Income', 'Expenses', 'Net Flow']],
             body: reportData.monthly.map(m => [
                 m.fullName,
                 formatCurrency(m.Income),
                 formatCurrency(m.Expense),
                 formatCurrency(m.Profit)
-            ])
+            ]),
+            columnStyles: {
+                1: { halign: 'right' },
+                2: { halign: 'right' },
+                3: { halign: 'right', fontStyle: 'bold' }
+            }
         });
 
         const pageCount = (doc as any).internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
             doc.setFontSize(8);
-            doc.setTextColor(150);
-            doc.text('Generated by BizTrack System', 14, 285);
+            doc.setTextColor(156, 163, 175);
+            doc.text('Powered by FinFlow ZM Financial Insights', 14, 285);
             doc.text(`Page ${i} of ${pageCount}`, 200, 285, { align: 'right' });
         }
 
-        doc.save(`biztrack_report_${new Date().toISOString().slice(0, 10)}.pdf`);
+        doc.save(`FinFlow_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
     };
 
     return (
@@ -240,8 +282,8 @@ export function ReportsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
-                        <span className="w-2 h-8 rounded-full bg-purple-600 block"></span>
+                    <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+                        <img src="/FinFlow.svg" alt="FinFlow ZM" className="h-8 w-8 object-contain" />
                         Financial Reports
                     </h1>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Deep insights into your business performance and growth.</p>
@@ -305,17 +347,17 @@ export function ReportsPage() {
                             <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Income</p>
                             <p className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{formatCurrency(reportData.summary.totalIncome)}</p>
                         </Card>
-                        <Card className="p-6 border-l-4 border-l-pink-500 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
+                        <Card className="p-6 border-l-4 border-l-purple-300 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
                             <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Expenses</p>
                             <p className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{formatCurrency(reportData.summary.totalExpense)}</p>
                         </Card>
-                        <Card className="p-6 border-l-4 border-l-emerald-500 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
+                        <Card className="p-6 border-l-4 border-l-purple-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
                             <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Net Profit</p>
                             <div className="flex items-center mt-2">
-                                <p className={cn("text-3xl font-extrabold", reportData.summary.netProfit >= 0 ? "text-emerald-600" : "text-pink-600")}>
+                                <p className={cn("text-3xl font-extrabold", reportData.summary.netProfit >= 0 ? "text-purple-700" : "text-purple-900")}>
                                     {formatCurrency(reportData.summary.netProfit)}
                                 </p>
-                                {reportData.summary.netProfit > 0 && <TrendingUp className="h-6 w-6 text-emerald-600 ml-2" />}
+                                {reportData.summary.netProfit > 0 && <TrendingUp className="h-6 w-6 text-purple-700 ml-2" />}
                             </div>
                         </Card>
                     </div>
@@ -336,7 +378,7 @@ export function ReportsPage() {
                                         <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                                             <Lightbulb className="h-5 w-5 text-yellow-300" />
                                         </div>
-                                        <h3 className="font-bold text-lg">BizTrack Tip</h3>
+                                        <h3 className="font-bold text-lg">FinFlow ZM Tip</h3>
                                     </div>
                                     <p className="text-purple-100 text-sm leading-relaxed">
                                         Your highest expense is <span className="font-bold text-white border-b border-white/30 pb-0.5">{reportData.categoryData[0]?.name || 'N/A'}</span>.

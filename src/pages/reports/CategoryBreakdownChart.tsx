@@ -30,8 +30,8 @@ export function CategoryBreakdownChart({ data }: CategoryBreakdownChartProps) {
     return (
 
         <Card className="col-span-1 shadow-md border-gray-100 dark:border-gray-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl overflow-hidden h-full hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-white dark:from-slate-800 dark:to-slate-800/80 border-b border-gray-100 dark:border-gray-700/50">
-                <CardTitle className="text-xl font-extrabold text-[#EF7D00] tracking-tight">Expense Breakdown</CardTitle>
+            <CardHeader className="bg-gradient-to-r from-purple-50/50 to-white dark:from-slate-800 dark:to-slate-800/80 border-b border-gray-100 dark:border-gray-700/50">
+                <CardTitle className="text-xl font-extrabold text-purple-700 tracking-tight">Expense Breakdown</CardTitle>
                 <p className="text-sm text-gray-500 font-medium">Distribution by category</p>
             </CardHeader>
             <CardContent className="pt-6">

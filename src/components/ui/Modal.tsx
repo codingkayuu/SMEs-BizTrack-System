@@ -25,7 +25,8 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                     {/* Modal Panel */}
-                    <div className="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-8 animate-in zoom-in-95 duration-300 border border-purple-100 ring-1 ring-black/5">
+                    {/* Modal Panel - Mobile: Full Screen/Bottom Sheetish, Desktop: Standard Modal */}
+                    <div className="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all w-full h-full sm:h-auto sm:my-8 sm:max-w-lg sm:p-8 animate-in zoom-in-95 duration-300 border border-purple-100 ring-1 ring-black/5 flex flex-col sm:block">
 
                         <div className="absolute top-0 right-0 hidden pt-6 pr-6 sm:block">
                             <button
@@ -39,8 +40,8 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
                         </div>
 
                         <div className="sm:flex sm:items-start w-full">
-                            <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                                <h3 className="text-2xl font-bold leading-6 text-gray-900 tracking-tight flex items-center gap-3" id="modal-title">
+                            <div className="mt-3 text-center sm:mt-0 sm:text-left w-full flex-1 overflow-y-auto sm:overflow-visible p-6 sm:p-0">
+                                <h3 className="text-2xl font-bold leading-6 text-gray-900 tracking-tight flex items-center gap-3 sticky top-0 bg-white z-10 pb-4 sm:static sm:pb-0" id="modal-title">
                                     <span className="w-2 h-8 bg-[#7C3AED] rounded-full inline-block"></span>
                                     {title}
                                 </h3>

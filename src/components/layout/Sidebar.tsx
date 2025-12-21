@@ -19,7 +19,7 @@ interface SidebarProps {
 }
 
 const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: FileText, label: 'Invoices', path: '/invoices' },
     { icon: TrendingUp, label: 'Income', path: '/income' },
     { icon: TrendingDown, label: 'Expenses', path: '/expenses' },
@@ -52,10 +52,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     <div className="h-24 flex items-center px-8">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-purple-600 rounded-xl shadow-lg shadow-purple-200">
-                                <TrendingUp className="h-6 w-6 text-white" />
-                            </div>
-                            <div>
-                                <span className="text-2xl font-bold tracking-tight text-gray-900">BizTrack</span>
+                                <img src="/FinFlow.svg" alt="FinFlow ZM" className="h-8 w-8 object-contain filter brightness-0 invert" />
                             </div>
                         </div>
                     </div>
