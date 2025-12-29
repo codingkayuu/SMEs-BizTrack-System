@@ -99,7 +99,7 @@ export function AdminLayout() {
             case 'super_admin':
                 return 'from-amber-500 to-orange-500';
             case 'admin':
-                return 'from-violet-500 to-purple-600';
+                return 'from-emerald-500 to-emerald-600';
             default:
                 return 'from-slate-500 to-slate-600';
         }
@@ -120,7 +120,7 @@ export function AdminLayout() {
 
     return (
         <div className="min-h-screen flex" style={{
-            background: 'linear-gradient(135deg, #1a0a2e 0%, #16082a 25%, #1a0a2e 50%, #2d1b4e 75%, #1a0a2e 100%)'
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #0f172a 50%, #334155 75%, #0f172a 100%)'
         }}>
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
@@ -136,41 +136,35 @@ export function AdminLayout() {
                 w-72 transform transition-transform duration-300 ease-in-out
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             `} style={{
-                    background: 'rgba(26, 10, 46, 0.95)',
+                    background: 'rgba(15, 23, 42, 0.95)',
                     backdropFilter: 'blur(20px)',
-                    borderRight: '1px solid rgba(139, 92, 246, 0.2)'
+                    borderRight: '1px solid rgba(16, 185, 129, 0.2)'
                 }}>
                 {/* Logo */}
                 <div className="h-20 flex items-center justify-between px-6" style={{
-                    borderBottom: '1px solid rgba(139, 92, 246, 0.15)'
+                    borderBottom: '1px solid rgba(16, 185, 129, 0.15)'
                 }}>
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{
-                            background: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)',
-                            boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)'
-                        }}>
-                            <ShieldCheck className="w-5 h-5 text-white" />
-                        </div>
                         <div>
-                            <h1 className="text-lg font-bold text-white">BizTrack</h1>
-                            <p className="text-xs text-violet-400">Admin Portal</p>
+                            <h1 className="text-3xl font-black italic text-white tracking-tighter drop-shadow-sm">Trackify</h1>
+                            <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-emerald-400 opacity-80">Admin Portal</p>
                         </div>
                     </div>
                     <button
                         onClick={() => setSidebarOpen(false)}
-                        className="lg:hidden text-violet-400 hover:text-white p-1"
+                        className="lg:hidden text-emerald-400 hover:text-white p-1"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Admin Profile */}
-                <div className="px-4 py-4" style={{ borderBottom: '1px solid rgba(139, 92, 246, 0.15)' }}>
+                <div className="px-4 py-4" style={{ borderBottom: '1px solid rgba(16, 185, 129, 0.15)' }}>
                     <div className="flex items-center gap-3 p-3 rounded-xl" style={{
-                        background: 'rgba(139, 92, 246, 0.1)'
+                        background: 'rgba(16, 185, 129, 0.1)'
                     }}>
                         <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold" style={{
-                            background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)'
+                            background: 'linear-gradient(135deg, #059669 0%, #064e3b 100%)'
                         }}>
                             {adminProfile?.full_name?.charAt(0) || 'A'}
                         </div>
@@ -193,7 +187,7 @@ export function AdminLayout() {
                                 <>
                                     <button
                                         onClick={() => toggleExpanded(item.label)}
-                                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-violet-300 hover:text-white hover:bg-violet-500/10 transition-all"
+                                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
                                     >
                                         <div className="flex items-center gap-3">
                                             {item.icon}
@@ -211,8 +205,8 @@ export function AdminLayout() {
                                                     className={({ isActive }) => `
                                                         block px-4 py-2 rounded-lg text-sm transition-all
                                                         ${isActive
-                                                            ? 'text-white bg-violet-500/20'
-                                                            : 'text-violet-400 hover:text-white hover:bg-violet-500/10'
+                                                            ? 'text-white bg-emerald-500/20'
+                                                            : 'text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10'
                                                         }
                                                     `}
                                                 >
@@ -230,13 +224,13 @@ export function AdminLayout() {
                                     className={({ isActive }) => `
                                         flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                                         ${isActive
-                                            ? 'text-white bg-gradient-to-r from-violet-600/30 to-purple-600/30 shadow-lg'
-                                            : 'text-violet-300 hover:text-white hover:bg-violet-500/10'
+                                            ? 'text-white bg-gradient-to-r from-emerald-600/30 to-emerald-800/30 shadow-lg'
+                                            : 'text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10'
                                         }
                                     `}
                                     style={({ isActive }) => isActive ? {
-                                        boxShadow: '0 4px 20px rgba(139, 92, 246, 0.2)',
-                                        border: '1px solid rgba(139, 92, 246, 0.3)'
+                                        boxShadow: '0 4px 20px rgba(5, 150, 105, 0.2)',
+                                        border: '1px solid rgba(5, 150, 105, 0.3)'
                                     } : {}}
                                 >
                                     {item.icon}
@@ -248,7 +242,7 @@ export function AdminLayout() {
                 </nav>
 
                 {/* Sign Out */}
-                <div className="p-4" style={{ borderTop: '1px solid rgba(139, 92, 246, 0.15)' }}>
+                <div className="p-4" style={{ borderTop: '1px solid rgba(16, 185, 129, 0.15)' }}>
                     <button
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
@@ -263,25 +257,25 @@ export function AdminLayout() {
             <div className="flex-1 flex flex-col min-h-screen">
                 {/* Header */}
                 <header className="h-20 flex items-center justify-between px-6" style={{
-                    background: 'rgba(26, 10, 46, 0.8)',
+                    background: 'rgba(15, 23, 42, 0.8)',
                     backdropFilter: 'blur(20px)',
-                    borderBottom: '1px solid rgba(139, 92, 246, 0.15)'
+                    borderBottom: '1px solid rgba(16, 185, 129, 0.15)'
                 }}>
                     <button
                         onClick={() => setSidebarOpen(true)}
-                        className="lg:hidden p-2 rounded-xl text-violet-400 hover:text-white hover:bg-violet-500/20 transition-all"
+                        className="lg:hidden p-2 rounded-xl text-emerald-400 hover:text-white hover:bg-emerald-500/20 transition-all"
                     >
                         <Menu className="w-6 h-6" />
                     </button>
 
                     <div className="hidden lg:block">
                         <h2 className="text-xl font-semibold text-white">Platform Administration</h2>
-                        <p className="text-sm text-violet-400">Monitor and manage your BizTrack platform</p>
+                        <p className="text-sm text-emerald-400">Monitor and manage your Trackify platform</p>
                     </div>
 
                     <div className="flex items-center gap-4">
                         {/* Notifications */}
-                        <button className="relative p-2 rounded-xl text-violet-400 hover:text-white hover:bg-violet-500/20 transition-all">
+                        <button className="relative p-2 rounded-xl text-emerald-400 hover:text-white hover:bg-emerald-500/20 transition-all">
                             <Bell className="w-5 h-5" />
                             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
                         </button>
@@ -289,7 +283,7 @@ export function AdminLayout() {
                         {/* Admin Info (Mobile) */}
                         <div className="lg:hidden flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold" style={{
-                                background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)'
+                                background: 'linear-gradient(135deg, #059669 0%, #064e3b 100%)'
                             }}>
                                 {adminProfile?.full_name?.charAt(0) || 'A'}
                             </div>

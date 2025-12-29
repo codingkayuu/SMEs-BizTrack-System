@@ -205,19 +205,19 @@ export function DashboardPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between animate-fade-in-up duration-500">
                 <div>
-                    <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center">
-                        <img src="/FinFlow.svg" alt="FinFlow ZM" className="h-12 w-12 object-contain mr-3" />
-                        <span className="ml-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                            <span className="w-2 h-2 rounded-full bg-purple-600 mr-1.5 animate-pulse"></span>
+                    <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-4">
+                        <span className="text-4xl font-black italic text-emerald-950 tracking-tighter">Trackify</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                            <span className="w-2 h-2 rounded-full bg-emerald-600 mr-1.5 animate-pulse"></span>
                             Live Data
                         </span>
                     </h1>
-                    <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
-                        Welcome back, <span className="font-bold text-purple-600">{profile?.owner_name || 'User'}</span>! Here's what's happening today.
+                    <p className="mt-2 text-base text-slate-500 dark:text-gray-400">
+                        Welcome back, <span className="font-bold text-emerald-600">{profile?.owner_name || 'User'}</span>! Here's what's happening today.
                     </p>
                 </div>
                 <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-xl border border-purple-100 dark:border-gray-700 shadow-sm">
+                    <span className="text-sm font-medium text-slate-500 dark:text-gray-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm">
                         {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </span>
                     <Button variant="secondary" onClick={fetchData} isLoading={loading} leftIcon={RefreshCw} className="rounded-xl shadow-sm hover:shadow-md transition-shadow">

@@ -53,7 +53,7 @@ interface RecentActivity {
     business_name?: string;
 }
 
-const COLORS = ['#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE'];
+const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#94a3b8', '#64748b'];
 
 export function AdminDashboardPage() {
     const { adminProfile } = useAdminAuth();
@@ -231,8 +231,8 @@ export function AdminDashboardPage() {
         return (
             <div className="flex items-center justify-center h-96">
                 <div className="text-center">
-                    <Loader2 className="w-12 h-12 text-violet-500 animate-spin mx-auto mb-4" />
-                    <p className="text-violet-300">Loading platform data...</p>
+                    <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mx-auto mb-4" />
+                    <p className="text-emerald-300">Loading platform data...</p>
                 </div>
             </div>
         );
@@ -244,7 +244,7 @@ export function AdminDashboardPage() {
             value: stats?.totalBusinesses || 0,
             change: `+${stats?.newBusinessesThisMonth || 0} this month`,
             icon: Building2,
-            color: 'from-violet-500 to-purple-600',
+            color: 'from-emerald-500 to-emerald-600',
             trend: 'up'
         },
         {
@@ -297,14 +297,14 @@ export function AdminDashboardPage() {
                     <h1 className="text-2xl sm:text-3xl font-bold text-white">
                         Welcome back, {adminProfile?.full_name?.split(' ')[0] || 'Admin'}! 👋
                     </h1>
-                    <p className="text-violet-300 mt-1">Here's what's happening across your platform</p>
+                    <p className="text-emerald-300 mt-1">Here's what's happening across your platform</p>
                 </div>
                 <button
                     onClick={fetchDashboardData}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-medium transition-all hover:scale-105"
                     style={{
-                        background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
-                        boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)'
+                        background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                        boxShadow: '0 4px 20px rgba(16, 185, 129, 0.3)'
                     }}
                 >
                     <RefreshCw className="w-4 h-4" />
@@ -321,7 +321,7 @@ export function AdminDashboardPage() {
                         style={{
                             background: 'rgba(255, 255, 255, 0.05)',
                             backdropFilter: 'blur(20px)',
-                            border: '1px solid rgba(139, 92, 246, 0.2)',
+                            border: '1px solid rgba(16, 185, 129, 0.2)',
                             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
                         }}
                     >
@@ -332,9 +332,9 @@ export function AdminDashboardPage() {
                             {card.trend === 'up' && <ArrowUpRight className="w-5 h-5 text-emerald-400" />}
                             {card.trend === 'down' && <ArrowDownRight className="w-5 h-5 text-red-400" />}
                         </div>
-                        <h3 className="text-violet-300 text-sm font-medium mb-1">{card.title}</h3>
+                        <h3 className="text-slate-300 text-sm font-medium mb-1">{card.title}</h3>
                         <p className="text-2xl font-bold text-white mb-2">{card.value}</p>
-                        <p className="text-xs text-violet-400">{card.change}</p>
+                        <p className="text-xs text-slate-400">{card.change}</p>
                     </div>
                 ))}
             </div>
@@ -345,10 +345,10 @@ export function AdminDashboardPage() {
                 <div className="p-6 rounded-2xl" style={{
                     background: 'rgba(255, 255, 255, 0.05)',
                     backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)'
+                    border: '1px solid rgba(16, 185, 129, 0.2)'
                 }}>
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <BarChart2 className="w-5 h-5 text-violet-400" />
+                        <BarChart2 className="w-5 h-5 text-emerald-400" />
                         Revenue vs Expenses (6 Months)
                     </h3>
                     <div className="h-80 w-full min-h-[320px]">
@@ -356,29 +356,29 @@ export function AdminDashboardPage() {
                             <AreaChart data={monthlyData}>
                                 <defs>
                                     <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#059669" stopOpacity={0.4} />
+                                        <stop offset="95%" stopColor="#059669" stopOpacity={0} />
                                     </linearGradient>
                                     <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#EF4444" stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.4} />
+                                        <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(139, 92, 246, 0.1)" />
-                                <XAxis dataKey="month" stroke="#A78BFA" tick={{ fill: '#A78BFA' }} />
-                                <YAxis stroke="#A78BFA" tick={{ fill: '#A78BFA' }} tickFormatter={(value) => `K${(value / 1000).toFixed(0)}`} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(16, 185, 129, 0.1)" />
+                                <XAxis dataKey="month" stroke="#10b981" tick={{ fill: '#10b981' }} />
+                                <YAxis stroke="#10b981" tick={{ fill: '#10b981' }} tickFormatter={(value) => `K${(value / 1000).toFixed(0)}`} />
                                 <Tooltip
                                     contentStyle={{
-                                        background: 'rgba(26, 10, 46, 0.95)',
-                                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                                        background: 'rgba(15, 23, 42, 0.95)',
+                                        border: '1px solid rgba(16, 185, 129, 0.3)',
                                         borderRadius: '12px',
                                         color: '#fff'
                                     }}
                                     formatter={(value: number) => formatCurrency(value)}
                                 />
                                 <Legend />
-                                <Area type="monotone" dataKey="income" name="Income" stroke="#8B5CF6" fill="url(#incomeGradient)" strokeWidth={2} />
-                                <Area type="monotone" dataKey="expenses" name="Expenses" stroke="#EF4444" fill="url(#expenseGradient)" strokeWidth={2} />
+                                <Area type="monotone" dataKey="income" name="Income" stroke="#059669" fill="url(#incomeGradient)" strokeWidth={2} />
+                                <Area type="monotone" dataKey="expenses" name="Expenses" stroke="#94a3b8" fill="url(#expenseGradient)" strokeWidth={2} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -388,10 +388,10 @@ export function AdminDashboardPage() {
                 <div className="p-6 rounded-2xl" style={{
                     background: 'rgba(255, 255, 255, 0.05)',
                     backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)'
+                    border: '1px solid rgba(16, 185, 129, 0.2)'
                 }}>
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <DollarSign className="w-5 h-5 text-violet-400" />
+                        <DollarSign className="w-5 h-5 text-emerald-400" />
                         Expense Distribution
                     </h3>
                     <div className="h-80 w-full min-h-[320px]">
@@ -414,8 +414,8 @@ export function AdminDashboardPage() {
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{
-                                        background: 'rgba(26, 10, 46, 0.95)',
-                                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                                        background: 'rgba(15, 23, 42, 0.95)',
+                                        border: '1px solid rgba(16, 185, 129, 0.3)',
                                         borderRadius: '12px',
                                         color: '#fff'
                                     }}
@@ -436,15 +436,15 @@ export function AdminDashboardPage() {
                     border: '1px solid rgba(139, 92, 246, 0.2)'
                 }}>
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <Building2 className="w-5 h-5 text-violet-400" />
+                        <Building2 className="w-5 h-5 text-emerald-400" />
                         Recent Businesses
                     </h3>
                     <div className="space-y-3">
                         {businesses.slice(0, 5).map((business, index) => (
                             <div
                                 key={business.id}
-                                className="flex items-center gap-4 p-3 rounded-xl transition-all hover:bg-violet-500/10"
-                                style={{ background: 'rgba(139, 92, 246, 0.05)' }}
+                                className="flex items-center gap-4 p-3 rounded-xl transition-all hover:bg-emerald-500/10"
+                                style={{ background: 'rgba(16, 185, 129, 0.05)' }}
                             >
                                 <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold" style={{
                                     background: `linear-gradient(135deg, ${COLORS[index % COLORS.length]} 0%, ${COLORS[(index + 1) % COLORS.length]} 100%)`
@@ -453,16 +453,16 @@ export function AdminDashboardPage() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-white font-medium truncate">{business.business_name}</p>
-                                    <p className="text-violet-400 text-sm">{business.owner_name}</p>
+                                    <p className="text-emerald-400 text-sm">{business.owner_name}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-violet-300 text-xs">Joined</p>
+                                    <p className="text-emerald-300 text-xs">Joined</p>
                                     <p className="text-white text-sm">{new Date(business.created_at).toLocaleDateString()}</p>
                                 </div>
                             </div>
                         ))}
                         {businesses.length === 0 && (
-                            <p className="text-violet-400 text-center py-8">No businesses registered yet</p>
+                            <p className="text-emerald-400 text-center py-8">No businesses registered yet</p>
                         )}
                     </div>
                 </div>
@@ -474,7 +474,7 @@ export function AdminDashboardPage() {
                     border: '1px solid rgba(139, 92, 246, 0.2)'
                 }}>
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-violet-400" />
+                        <Clock className="w-5 h-5 text-emerald-400" />
                         Recent Activity
                     </h3>
                     <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -482,11 +482,11 @@ export function AdminDashboardPage() {
                             <div
                                 key={`${activity.type}-${activity.id}`}
                                 className="flex items-center gap-4 p-3 rounded-xl"
-                                style={{ background: 'rgba(139, 92, 246, 0.05)' }}
+                                style={{ background: 'rgba(16, 185, 129, 0.05)' }}
                             >
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.type === 'income' ? 'bg-emerald-500/20 text-emerald-400' :
-                                    activity.type === 'expense' ? 'bg-red-500/20 text-red-400' :
-                                        activity.type === 'business' ? 'bg-violet-500/20 text-violet-400' :
+                                    activity.type === 'expense' ? 'bg-slate-500/20 text-slate-400' :
+                                        activity.type === 'business' ? 'bg-emerald-500/20 text-emerald-400' :
                                             'bg-amber-500/20 text-amber-400'
                                     }`}>
                                     {activity.type === 'income' && <TrendingUp className="w-5 h-5" />}
@@ -496,20 +496,20 @@ export function AdminDashboardPage() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-white text-sm truncate">{activity.description}</p>
-                                    <p className="text-violet-400 text-xs">{activity.business_name}</p>
+                                    <p className="text-emerald-400 text-xs">{activity.business_name}</p>
                                 </div>
                                 <div className="text-right">
                                     {activity.amount && (
-                                        <p className={`font-semibold ${activity.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                        <p className={`font-semibold ${activity.type === 'income' ? 'text-emerald-400' : 'text-slate-400'}`}>
                                             {activity.type === 'income' ? '+' : '-'}{formatCurrency(activity.amount)}
                                         </p>
                                     )}
-                                    <p className="text-violet-400 text-xs">{formatDate(activity.date)}</p>
+                                    <p className="text-emerald-400 text-xs">{formatDate(activity.date)}</p>
                                 </div>
                             </div>
                         ))}
                         {recentActivity.length === 0 && (
-                            <p className="text-violet-400 text-center py-8">No recent activity</p>
+                            <p className="text-emerald-400 text-center py-8">No recent activity</p>
                         )}
                     </div>
                 </div>

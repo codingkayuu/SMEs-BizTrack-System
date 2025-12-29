@@ -28,10 +28,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
             className={cn(
                 "btn disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 transition-all duration-200",
                 {
-                    'btn-primary bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-lg shadow-purple-500/30 border-transparent': variant === 'primary',
-                    'bg-white text-gray-700 border border-purple-100 hover:bg-purple-50 hover:border-purple-200 hover:text-[#7C3AED] shadow-sm': variant === 'secondary',
-                    'bg-transparent border-2 border-[#7C3AED] text-[#7C3AED] hover:bg-[#7C3AED] hover:text-white': variant === 'outline',
-                    'bg-transparent text-gray-600 hover:bg-purple-50 hover:text-[#7C3AED]': variant === 'ghost',
+                    'btn-primary bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/30 border-transparent': variant === 'primary',
+                    'bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600 shadow-sm': variant === 'secondary',
+                    'bg-transparent border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white': variant === 'outline',
+                    'bg-transparent text-slate-600 hover:bg-emerald-50 hover:text-emerald-600': variant === 'ghost',
                     'bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-500/30': variant === 'danger',
 
                     'px-3 py-1.5 text-xs font-medium rounded-lg': size === 'sm',

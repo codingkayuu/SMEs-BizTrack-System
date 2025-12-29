@@ -44,16 +44,16 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
             {/* Sidebar Container */}
             <aside className={cn(
-                "fixed top-0 left-0 z-50 h-full w-72 bg-white text-gray-600 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-screen shadow-xl lg:shadow-none border-r border-purple-100",
+                "fixed top-0 left-0 z-50 h-full w-72 bg-white text-slate-600 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-screen shadow-xl lg:shadow-none border-r border-slate-100",
                 isOpen ? "translate-x-0" : "-translate-x-full"
             )}>
                 <div className="flex flex-col h-full relative z-10">
                     {/* Logo Area */}
                     <div className="h-24 flex items-center px-8">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-600 rounded-xl shadow-lg shadow-purple-200">
-                                <img src="/FinFlow.svg" alt="FinFlow ZM" className="h-8 w-8 object-contain filter brightness-0 invert" />
-                            </div>
+                            <span className="text-3xl font-black italic text-emerald-800 tracking-tighter">
+                                Trackify
+                            </span>
                         </div>
                     </div>
 
@@ -68,8 +68,8 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                                         className={({ isActive }) => cn(
                                             "flex items-center px-4 py-3.5 rounded-2xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
                                             isActive
-                                                ? "bg-purple-50 text-purple-700 shadow-sm"
-                                                : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                                ? "bg-emerald-50 text-emerald-700 shadow-sm"
+                                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                                         )}
                                     >
                                         <item.icon className={cn(
@@ -83,7 +83,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     </nav>
 
                     {/* Sign Out (Bottom) */}
-                    <div className="p-6 border-t border-purple-50">
+                    <div className="p-6 border-t border-slate-50">
                         <button
                             onClick={() => signOut()}
                             className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-200 group"

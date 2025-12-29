@@ -128,8 +128,8 @@ export function SettingsPage() {
         <div className="max-w-6xl mx-auto space-y-8 animate-fade-in-up duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
-                        <span className="w-2 h-8 rounded-full bg-purple-600 block"></span>
+                    <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                        <span className="w-2 h-8 rounded-full bg-emerald-600 block"></span>
                         Settings
                     </h1>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Manage your business preferences and account security.</p>
@@ -138,7 +138,7 @@ export function SettingsPage() {
 
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Sidebar Navigation */}
-                <Card className="lg:w-64 h-fit p-3 sticky top-[100px] border-purple-100 shadow-sm bg-white dark:bg-slate-800 rounded-2xl md:min-w-[250px]">
+                <Card className="lg:w-64 h-fit p-3 sticky top-[100px] border-slate-200 shadow-sm bg-white dark:bg-slate-800 rounded-2xl md:min-w-[250px]">
                     <nav className="space-y-2">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
@@ -149,11 +149,11 @@ export function SettingsPage() {
                                     className={cn(
                                         "w-full flex items-center px-4 py-3.5 text-sm font-semibold rounded-xl transition-all duration-300",
                                         activeTab === tab.id
-                                            ? "bg-purple-600 text-white shadow-md shadow-purple-200"
-                                            : "text-gray-600 dark:text-gray-400 hover:bg-purple-50 dark:hover:bg-slate-700 hover:text-purple-700"
+                                            ? "bg-emerald-600 text-white shadow-md shadow-emerald-200"
+                                            : "text-slate-600 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-slate-700 hover:text-emerald-700"
                                     )}
                                 >
-                                    <Icon className={cn("mr-3 h-5 w-5", activeTab === tab.id ? "text-white" : "text-gray-400 group-hover:text-purple-600")} />
+                                    <Icon className={cn("mr-3 h-5 w-5", activeTab === tab.id ? "text-white" : "text-slate-400 group-hover:text-emerald-600")} />
                                     {tab.label}
                                 </button>
                             );
@@ -167,17 +167,17 @@ export function SettingsPage() {
                     {activeTab === 'profile' && (
                         <div className="space-y-6 animate-in fade-in duration-300 slide-in-from-bottom-2">
                             {/* Logo Section */}
-                            <Card className="p-8 border-purple-100 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg mr-3">
-                                        <Camera className="h-5 w-5 text-purple-600" />
+                            <Card className="p-8 border-slate-200 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+                                    <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg mr-3">
+                                        <Camera className="h-5 w-5 text-emerald-600" />
                                     </div>
                                     Business Logo
                                 </h3>
                                 <div className="flex items-center gap-8">
                                     <div className="relative group">
-                                        <div className="h-32 w-32 rounded-full bg-gray-50 dark:bg-slate-900 flex items-center justify-center border-4 border-white dark:border-slate-700 shadow-lg overflow-hidden group-hover:border-purple-600 transition-colors duration-300">
-                                            <Building className="h-12 w-12 text-gray-300" />
+                                        <div className="h-32 w-32 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center border-4 border-white dark:border-slate-700 shadow-lg overflow-hidden group-hover:border-emerald-600 transition-colors duration-300">
+                                            <Building className="h-12 w-12 text-slate-300" />
                                         </div>
                                         <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
                                             <Upload className="h-8 w-8 text-white scale-75 group-hover:scale-100 transition-transform duration-300" />
@@ -188,7 +188,7 @@ export function SettingsPage() {
                                             variant="outline"
                                             size="sm"
                                             leftIcon={Upload}
-                                            className="border-gray-300 hover:border-purple-600 hover:text-purple-600 transition-all"
+                                            className="border-slate-200 hover:border-emerald-600 hover:text-emerald-600 transition-all"
                                         >
                                             Upload New Logo
                                         </Button>
@@ -197,10 +197,10 @@ export function SettingsPage() {
                                 </div>
                             </Card>
 
-                            <Card className="p-8 border-purple-100 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-8 flex items-center">
-                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg mr-3">
-                                        <Building className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                            <Card className="p-8 border-slate-200 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-8 flex items-center">
+                                    <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg mr-3">
+                                        <Building className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                     </div>
                                     Business Information
                                 </h3>
@@ -210,9 +210,9 @@ export function SettingsPage() {
                                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Business Name</label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <Building className="h-5 w-5 text-gray-400" />
+                                                    <Building className="h-5 w-5 text-slate-400" />
                                                 </div>
-                                                <input {...register('business_name')} className="block w-full pl-12 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-purple-600 focus:border-purple-600 bg-white dark:bg-slate-900 sm:text-sm h-12 transition-all" placeholder="e.g. Lusaka Logistics" />
+                                                <input {...register('business_name')} className="block w-full pl-12 border-slate-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-emerald-600 focus:border-emerald-600 bg-white dark:bg-slate-900 sm:text-sm h-12 transition-all" placeholder="e.g. Lusaka Logistics" />
                                             </div>
                                             {errors.business_name && <p className="mt-1 text-xs text-red-600">{errors.business_name.message}</p>}
                                         </div>
@@ -221,9 +221,9 @@ export function SettingsPage() {
                                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Owner Name</label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <User className="h-5 w-5 text-gray-400" />
+                                                    <User className="h-5 w-5 text-slate-400" />
                                                 </div>
-                                                <input {...register('owner_name')} className="block w-full pl-12 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-purple-600 focus:border-purple-600 bg-white dark:bg-slate-900 sm:text-sm h-12 transition-all" placeholder="Full Name" />
+                                                <input {...register('owner_name')} className="block w-full pl-12 border-slate-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-emerald-600 focus:border-emerald-600 bg-white dark:bg-slate-900 sm:text-sm h-12 transition-all" placeholder="Full Name" />
                                             </div>
                                             {errors.owner_name && <p className="mt-1 text-xs text-red-600">{errors.owner_name.message}</p>}
                                         </div>
@@ -232,9 +232,9 @@ export function SettingsPage() {
                                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <Phone className="h-5 w-5 text-gray-400" />
+                                                    <Phone className="h-5 w-5 text-slate-400" />
                                                 </div>
-                                                <input {...register('phone_number')} className="block w-full pl-12 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-purple-600 focus:border-purple-600 bg-white dark:bg-slate-900 sm:text-sm h-12 transition-all" placeholder="+260..." />
+                                                <input {...register('phone_number')} className="block w-full pl-12 border-slate-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-emerald-600 focus:border-emerald-600 bg-white dark:bg-slate-900 sm:text-sm h-12 transition-all" placeholder="+260..." />
                                             </div>
                                             {errors.phone_number && <p className="mt-1 text-xs text-red-600">{errors.phone_number.message}</p>}
                                         </div>
@@ -243,9 +243,9 @@ export function SettingsPage() {
                                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Address / Location</label>
                                             <div className="relative">
                                                 <div className="absolute top-4 left-4 flex items-center pointer-events-none">
-                                                    <MapPin className="h-5 w-5 text-gray-400" />
+                                                    <MapPin className="h-5 w-5 text-slate-400" />
                                                 </div>
-                                                <textarea {...register('address')} rows={3} className="block w-full pl-12 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-purple-600 focus:border-purple-600 bg-white dark:bg-slate-900 sm:text-sm p-4 transition-all" placeholder="Street Address, City, Province" />
+                                                <textarea {...register('address')} rows={3} className="block w-full pl-12 border-slate-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-emerald-600 focus:border-emerald-600 bg-white dark:bg-slate-900 sm:text-sm p-4 transition-all" placeholder="Street Address, City, Province" />
                                             </div>
                                         </div>
                                     </div>
@@ -256,7 +256,7 @@ export function SettingsPage() {
                                             variant="primary"
                                             isLoading={submitting}
                                             leftIcon={Save}
-                                            className="px-8 py-3 h-auto text-base rounded-xl shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30"
+                                            className="px-8 py-3 h-auto text-base rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30"
                                         >
                                             Save Changes
                                         </Button>
@@ -269,17 +269,17 @@ export function SettingsPage() {
                     {/* APPEARANCE TAB */}
                     {activeTab === 'appearance' && (
                         <div className="space-y-6 animate-in fade-in duration-300 slide-in-from-bottom-2">
-                            <Card className="p-8 border-purple-100 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg mr-3">
-                                        <Palette className="h-5 w-5 text-purple-600" />
+                            <Card className="p-8 border-slate-200 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+                                    <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg mr-3">
+                                        <Palette className="h-5 w-5 text-emerald-600" />
                                     </div>
                                     Theme Settings
                                 </h3>
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-6 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-gray-200 dark:border-gray-700 transition-all hover:border-purple-400/50">
+                                    <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-gray-700 transition-all hover:border-emerald-400/50">
                                         <div className="flex items-center">
-                                            <div className={cn("p-3 rounded-full shadow-inner", theme === 'dark' ? "bg-indigo-100 text-indigo-600" : "bg-orange-100 text-orange-600")}>
+                                            <div className={cn("p-3 rounded-full shadow-inner", theme === 'dark' ? "bg-emerald-100 text-emerald-600" : "bg-orange-100 text-orange-600")}>
                                                 {theme === 'dark' ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
                                             </div>
                                             <div className="ml-5">
@@ -290,8 +290,8 @@ export function SettingsPage() {
                                         <button
                                             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                                             className={cn(
-                                                "relative inline-flex flex-shrink-0 h-8 w-14 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-600",
-                                                theme === 'dark' ? 'bg-indigo-600' : 'bg-gray-200'
+                                                "relative inline-flex flex-shrink-0 h-8 w-14 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600",
+                                                theme === 'dark' ? 'bg-emerald-600' : 'bg-slate-200'
                                             )}
                                         >
                                             <span className={cn(
@@ -308,10 +308,10 @@ export function SettingsPage() {
                     {/* SECURITY TAB */}
                     {activeTab === 'security' && (
                         <div className="space-y-6 animate-in fade-in duration-300 slide-in-from-bottom-2">
-                            <Card className="p-8 border-purple-100 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg mr-3">
-                                        <Shield className="h-5 w-5 text-purple-600" />
+                            <Card className="p-8 border-slate-200 shadow-sm bg-white dark:bg-slate-800 rounded-3xl">
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+                                    <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg mr-3">
+                                        <Shield className="h-5 w-5 text-emerald-600" />
                                     </div>
                                     Change Password
                                 </h3>
@@ -327,7 +327,7 @@ export function SettingsPage() {
                                                 type="password"
                                                 value={newPassword}
                                                 onChange={(e) => setNewPassword(e.target.value)}
-                                                className="block w-full border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-purple-600 focus:border-purple-600 bg-white dark:bg-slate-900 sm:text-sm h-12 px-4 transition-all"
+                                                className="block w-full border-slate-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-emerald-600 focus:border-emerald-600 bg-white dark:bg-slate-900 sm:text-sm h-12 px-4 transition-all"
                                                 required
                                                 minLength={6}
                                                 placeholder="••••••••"
@@ -344,7 +344,7 @@ export function SettingsPage() {
                                                 type="password"
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                                className="block w-full border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-purple-600 focus:border-purple-600 bg-white dark:bg-slate-900 sm:text-sm h-12 px-4 transition-all"
+                                                className="block w-full border-slate-200 dark:border-gray-700 rounded-xl shadow-sm focus:ring-emerald-600 focus:border-emerald-600 bg-white dark:bg-slate-900 sm:text-sm h-12 px-4 transition-all"
                                                 required
                                                 minLength={6}
                                                 placeholder="••••••••"
@@ -361,7 +361,7 @@ export function SettingsPage() {
                                             variant="primary"
                                             isLoading={passwordSubmitting}
                                             leftIcon={Lock}
-                                            className="w-full bg-purple-600 hover:bg-purple-700 border-none shadow-lg shadow-purple-500/20 py-3 rounded-xl"
+                                            className="w-full bg-emerald-600 hover:bg-emerald-700 border-none shadow-lg shadow-emerald-500/20 py-3 rounded-xl"
                                         >
                                             Update Password
                                         </Button>

@@ -12,8 +12,8 @@ import { Button } from '../../components/ui/Button';
 import { debounce } from '../../lib/performance';
 import { aiService } from '../../lib/ai';
 
-// Colors for pie chart - maintaining pale purple theme
-const COLORS = ['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE'];
+// Colors for pie chart - professional emerald & slate palette
+const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#94a3b8', '#64748b'];
 
 type DateRangeOption = 'daily' | 'week' | 'month' | '3months' | '6months' | 'year';
 
@@ -265,8 +265,8 @@ export function ReportsPage() {
         if (!profile) return;
         const doc = new jsPDF();
 
-        // Header - Theme Harmonized (Purple)
-        doc.setFillColor(124, 58, 237); // Purple 600
+        // Header - Theme Harmonized (Emerald)
+        doc.setFillColor(5, 150, 105); // Emerald 600
         doc.rect(0, 0, 210, 45, 'F');
 
         doc.setTextColor(255, 255, 255);
@@ -290,7 +290,7 @@ export function ReportsPage() {
             startY: 65,
             theme: 'grid',
             headStyles: {
-                fillColor: [124, 58, 237],
+                fillColor: [5, 150, 105],
                 textColor: [255, 255, 255],
                 fontStyle: 'bold'
             },
@@ -303,7 +303,7 @@ export function ReportsPage() {
             ],
             columnStyles: {
                 0: { cellWidth: 100 },
-                1: { halign: 'right', textColor: [67, 56, 202] }
+                1: { halign: 'right', textColor: [5, 150, 105] }
             }
         });
 
@@ -313,7 +313,7 @@ export function ReportsPage() {
         autoTable(doc, {
             startY: tableStartY + 5,
             theme: 'striped',
-            headStyles: { fillColor: [139, 92, 246] }, // Violet 500
+            headStyles: { fillColor: [16, 185, 129] }, // Emerald 500
             head: [['Period', 'Income', 'Expenses', 'Net Flow']],
             body: reportData.monthly.map(m => [
                 m.fullName,
@@ -333,23 +333,24 @@ export function ReportsPage() {
             doc.setPage(i);
             doc.setFontSize(8);
             doc.setTextColor(156, 163, 175);
-            doc.text('Powered by FinFlow ZM Financial Insights', 14, 285);
+            doc.text('Powered by Trackify Financial Insights', 14, 285);
             doc.text(`Page ${i} of ${pageCount}`, 200, 285, { align: 'right' });
         }
 
-        doc.save(`FinFlow_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+        doc.save(`Trackify_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
     };
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto animate-fade-in-up duration-500">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
-                        <img src="/FinFlow.svg" alt="FinFlow ZM" className="h-8 w-8 object-contain" />
-                        Financial Reports
-                    </h1>
-                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Deep insights into your business performance and growth.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <span className="text-4xl font-black italic text-white tracking-tighter">Trackify</span>
+                    <div className="h-8 w-[1px] bg-white/20 hidden sm:block"></div>
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Financial Reports</h1>
+                        <p className="text-emerald-400 font-medium">Business Performance Overview</p>
+                    </div>
                 </div>
                 <div className="flex items-center gap-3 mt-4 sm:mt-0 relative" ref={dropdownRef}>
 
@@ -357,17 +358,17 @@ export function ReportsPage() {
                     <div className="relative">
                         <button
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className="bg-white dark:bg-slate-800 border border-purple-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium py-2.5 px-4 rounded-xl shadow-sm hover:bg-purple-50 dark:hover:bg-slate-700 transition-all flex items-center min-w-[160px] justify-between focus:ring-2 focus:ring-purple-500 outline-none"
+                            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-300 font-medium py-2.5 px-4 rounded-xl shadow-sm hover:bg-emerald-50 dark:hover:bg-slate-700 transition-all flex items-center min-w-[160px] justify-between focus:ring-2 focus:ring-emerald-500 outline-none"
                         >
                             <span className="flex items-center">
-                                <Calendar className="h-4 w-4 mr-2.5 text-purple-600" />
+                                <Calendar className="h-4 w-4 mr-2.5 text-emerald-600" />
                                 {rangeLabels[dateRange]}
                             </span>
                             <ChevronDown className={cn("h-4 w-4 ml-2 transition-transform duration-200", isDropdownOpen ? "transform rotate-180" : "")} />
                         </button>
 
                         {isDropdownOpen && (
-                            <div className="absolute top-full left-0 mt-2 w-full min-w-[160px] bg-white dark:bg-slate-800 border border-purple-100 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="absolute top-full left-0 mt-2 w-full min-w-[160px] bg-white dark:bg-slate-800 border border-slate-100 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                 {Object.entries(rangeLabels).map(([key, label]) => (
                                     <button
                                         key={key}
@@ -378,8 +379,8 @@ export function ReportsPage() {
                                         className={cn(
                                             "w-full text-left px-4 py-3 text-sm transition-colors border-l-4",
                                             dateRange === key
-                                                ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 font-semibold border-purple-600"
-                                                : "text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-slate-700 border-transparent"
+                                                ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 font-semibold border-emerald-600"
+                                                : "text-slate-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-slate-700 border-transparent"
                                         )}
                                     >
                                         {label}
@@ -395,8 +396,8 @@ export function ReportsPage() {
                         onClick={() => setShowAI(!showAI)}
                         isLoading={aiLoading}
                         className={cn(
-                            "rounded-xl shadow-sm transition-all border-purple-100",
-                            showAI ? "bg-purple-600 text-white border-transparent" : "text-purple-600 hover:bg-purple-50"
+                            "rounded-xl shadow-sm transition-all border-slate-200",
+                            showAI ? "bg-emerald-600 text-white border-transparent" : "text-emerald-600 hover:bg-emerald-50"
                         )}
                     >
                         {showAI ? "AI Projections ON" : "AI Projections"}
@@ -406,7 +407,7 @@ export function ReportsPage() {
                         variant="primary"
                         leftIcon={Download}
                         onClick={downloadPDF}
-                        className="rounded-xl shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30"
+                        className="rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30"
                     >
                         Export PDF
                     </Button>
@@ -414,26 +415,26 @@ export function ReportsPage() {
             </div>
 
             {loading ? (
-                <div className="flex h-96 items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-purple-600" /></div>
+                <div className="flex h-96 items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-emerald-600" /></div>
             ) : (
                 <>
                     {/* Key Metrics Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-1 animate-fade-in-up">
-                        <Card className="p-6 border-l-4 border-l-purple-500 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
-                            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Income</p>
-                            <p className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{formatCurrency(reportData.summary.totalIncome)}</p>
+                        <Card className="p-6 border-l-4 border-l-emerald-500 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
+                            <p className="text-sm font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Total Income</p>
+                            <p className="text-3xl font-extrabold text-slate-900 dark:text-white mt-2">{formatCurrency(reportData.summary.totalIncome)}</p>
                         </Card>
-                        <Card className="p-6 border-l-4 border-l-purple-300 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
-                            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Expenses</p>
-                            <p className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">{formatCurrency(reportData.summary.totalExpense)}</p>
+                        <Card className="p-6 border-l-4 border-l-slate-300 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
+                            <p className="text-sm font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Total Expenses</p>
+                            <p className="text-3xl font-extrabold text-slate-900 dark:text-white mt-2">{formatCurrency(reportData.summary.totalExpense)}</p>
                         </Card>
-                        <Card className="p-6 border-l-4 border-l-purple-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
-                            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Net Profit</p>
+                        <Card className="p-6 border-l-4 border-l-emerald-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all">
+                            <p className="text-sm font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Net Profit</p>
                             <div className="flex items-center mt-2">
-                                <p className={cn("text-3xl font-extrabold", reportData.summary.netProfit >= 0 ? "text-purple-700" : "text-purple-900")}>
+                                <p className={cn("text-3xl font-extrabold", reportData.summary.netProfit >= 0 ? "text-emerald-700" : "text-emerald-900")}>
                                     {formatCurrency(reportData.summary.netProfit)}
                                 </p>
-                                {reportData.summary.netProfit > 0 && <TrendingUp className="h-6 w-6 text-purple-700 ml-2" />}
+                                {reportData.summary.netProfit > 0 && <TrendingUp className="h-6 w-6 text-emerald-700 ml-2" />}
                             </div>
                         </Card>
                     </div>
@@ -441,54 +442,51 @@ export function ReportsPage() {
                     {/* AI Predictive Summary Cards */}
                     {showAI && aiForecastMeta && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-2 animate-in fade-in slide-in-from-top-4 duration-500">
-                            <Card className="p-5 border-none bg-purple-900/10 dark:bg-purple-900/30 backdrop-blur-sm shadow-sm relative overflow-hidden group">
+                            <Card className="p-5 border-none bg-emerald-900/5 dark:bg-emerald-900/30 backdrop-blur-sm shadow-sm relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
-                                    <TrendingUp className="h-10 w-10 text-purple-600" />
+                                    <TrendingUp className="h-10 w-10 text-emerald-600" />
                                 </div>
-                                <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1">Growth Trend</p>
+                                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Growth Trend</p>
                                 <p className={cn(
                                     "text-2xl font-black",
-                                    aiForecastMeta.incomeTrend >= 0 ? "text-green-600" : "text-red-600"
+                                    aiForecastMeta.incomeTrend >= 0 ? "text-emerald-600" : "text-red-600"
                                 )}>
                                     {aiForecastMeta.incomeTrend > 0 ? '+' : ''}{aiForecastMeta.incomeTrend}%
                                 </p>
-                                <p className="text-[10px] text-gray-500 mt-1">Projected revenue momentum</p>
+                                <p className="text-[10px] text-slate-500 mt-1">Projected revenue momentum</p>
                             </Card>
-
-                            <Card className="p-5 border-none bg-purple-900/10 dark:bg-purple-900/30 backdrop-blur-sm shadow-sm relative overflow-hidden group">
+                            <Card className="p-5 border-none bg-emerald-900/5 dark:bg-emerald-900/30 backdrop-blur-sm shadow-sm relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
-                                    <Sparkles className="h-10 w-10 text-purple-600" />
+                                    <Sparkles className="h-10 w-10 text-emerald-600" />
                                 </div>
-                                <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1">Seasonality Mode</p>
-                                <p className="text-2xl font-black text-purple-900 dark:text-purple-100 capitalize">
+                                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Seasonality Mode</p>
+                                <p className="text-2xl font-black text-slate-900 dark:text-emerald-100 capitalize">
                                     {aiForecastMeta.seasonality}
                                 </p>
-                                <p className="text-[10px] text-gray-500 mt-1">Patterns detected in history</p>
+                                <p className="text-[10px] text-slate-500 mt-1">Patterns detected in history</p>
                             </Card>
-
-                            <Card className="p-5 border-none bg-purple-900/10 dark:bg-purple-900/30 backdrop-blur-sm shadow-sm relative overflow-hidden group">
+                            <Card className="p-5 border-none bg-emerald-900/5 dark:bg-emerald-900/30 backdrop-blur-sm shadow-sm relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
-                                    <AlertCircle className="h-10 w-10 text-purple-600" />
+                                    <AlertCircle className="h-10 w-10 text-emerald-600" />
                                 </div>
-                                <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1">Exp. Stability</p>
+                                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Exp. Stability</p>
                                 <p className={cn(
                                     "text-2xl font-black",
-                                    Math.abs(aiForecastMeta.expenseTrend) < 5 ? "text-green-600" : "text-amber-600"
+                                    Math.abs(aiForecastMeta.expenseTrend) < 5 ? "text-emerald-600" : "text-amber-600"
                                 )}>
                                     {Math.abs(aiForecastMeta.expenseTrend) < 5 ? 'High' : 'Moderate'}
                                 </p>
-                                <p className="text-[10px] text-gray-500 mt-1">Expense predictability score</p>
+                                <p className="text-[10px] text-slate-500 mt-1">Expense predictability score</p>
                             </Card>
-
-                            <Card className="p-5 border-none bg-purple-600 text-white shadow-xl relative overflow-hidden group">
+                            <Card className="p-5 border-none bg-emerald-600 text-white shadow-xl relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
                                     <Target className="h-10 w-10 text-white" />
                                 </div>
-                                <p className="text-[10px] font-bold text-purple-100 uppercase tracking-widest mb-1">Projected Next Month</p>
+                                <p className="text-[10px] font-bold text-emerald-100 uppercase tracking-widest mb-1">Projected Next Month</p>
                                 <p className="text-2xl font-black">
                                     {formatCurrency(reportData.monthly.filter(m => m.isProjected)[0]?.Profit || 0)}
                                 </p>
-                                <p className="text-[10px] text-purple-100 mt-1">AI-calculated net outcome</p>
+                                <p className="text-[10px] text-emerald-100 mt-1">AI-calculated net outcome</p>
                             </Card>
                         </div>
                     )}
@@ -500,29 +498,28 @@ export function ReportsPage() {
                             <CategoryBreakdownChart data={reportData.categoryData} />
 
                             {/* Optimization Tip Card */}
-                            <Card className="bg-gradient-to-br from-purple-600 to-indigo-700 text-white border-none shadow-xl relative overflow-hidden">
+                            <Card className="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white border-none shadow-xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
                                 <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-20 h-20 bg-black opacity-10 rounded-full blur-xl"></div>
-
                                 <div className="p-6 relative z-10">
                                     <div className="flex items-center space-x-3 mb-4">
                                         <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                                             <Lightbulb className="h-5 w-5 text-yellow-300" />
                                         </div>
-                                        <h3 className="font-bold text-lg">FinFlow ZM Insight</h3>
+                                        <h3 className="font-bold text-lg">Trackify Insight</h3>
                                     </div>
-                                    <p className="text-purple-100 text-sm leading-relaxed">
+                                    <p className="text-emerald-50 text-sm leading-relaxed">
                                         {aiInsights.length > 0
                                             ? aiInsights[0].message
                                             : `Your highest expense is ${reportData.categoryData[0]?.name || 'N/A'}. Consider reviewing your budget for this category.`}
                                     </p>
                                     <div className="mt-4 p-3 bg-white/10 rounded-lg border border-white/20">
-                                        <p className="text-[10px] text-purple-200 uppercase font-bold tracking-widest mb-1">Recommended Action</p>
+                                        <p className="text-[10px] text-emerald-100 uppercase font-bold tracking-widest mb-1">Recommended Action</p>
                                         <p className="text-xs text-white">
                                             {aiInsights.length > 0 ? aiInsights[0].action : "Keep monitoring your spending patterns weekly."}
                                         </p>
                                     </div>
-                                    <button className="mt-5 w-full py-2.5 bg-white text-purple-700 hover:bg-purple-50 rounded-xl text-sm font-bold transition-colors shadow-sm">
+                                    <button className="mt-5 w-full py-2.5 bg-white text-emerald-700 hover:bg-emerald-50 rounded-xl text-sm font-bold transition-colors shadow-sm">
                                         Learn More
                                     </button>
                                 </div>

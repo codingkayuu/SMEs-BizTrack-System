@@ -4,26 +4,26 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-brand-primary: #7C3AED;
-  /* Deep Purple */
-  --color-brand-secondary: #C084FC;
-  /* Soft Purple */
-  --color-brand-accent: #F3E8FF;
-  /* Pale Lavender */
-  --color-brand-black: #1E293B;
-  /* Slate 800 */
+  --color-brand-primary: #059669;
+  /* Emerald 600 */
+  --color-brand-secondary: #34d399;
+  /* Emerald 400 */
+  --color-brand-accent: #f59e0b;
+  /* Zambian Orange */
+  --color-brand-black: #0f172a;
+  /* Slate 900 */
 
-  --color-primary-50: #faf5ff;
-  --color-primary-100: #f3e8ff;
-  --color-primary-200: #e9d5ff;
-  --color-primary-300: #d8b4fe;
-  --color-primary-400: #c084fc;
-  --color-primary-500: #a855f7;
-  --color-primary-600: #9333ea;
-  --color-primary-700: #7e22ce;
-  --color-primary-800: #6b21a8;
-  --color-primary-900: #581c87;
-  --color-primary-950: #3b0764;
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+  --color-primary-950: #052e16;
 
   --color-primary: var(--color-brand-primary);
 
@@ -63,12 +63,12 @@
   0%,
   100% {
     opacity: 1;
-    box-shadow: 0 0 0 0px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 0 0px rgba(5, 150, 105, 0.4);
   }
 
   50% {
     opacity: .8;
-    box-shadow: 0 0 0 10px rgba(124, 58, 237, 0);
+    box-shadow: 0 0 0 10px rgba(5, 150, 105, 0);
   }
 }
 
@@ -86,9 +86,10 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: #FBF7FF;
-  /* Pale Purple Background */
-  color: #1E293B;
+  background-color: #f8fafc;
+  /* Slate 50 */
+  color: #0f172a;
+  /* Slate 900 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -102,7 +103,8 @@ body {
 /* Clean Elegant Cards (No Glass) */
 .glass {
   background: white;
-  border: 1px solid #E9D5FF;
+  border: 1px solid #e2e8f0;
+  /* Slate 200 */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
@@ -115,8 +117,8 @@ body {
 /* Card Styles */
 .glass-card {
   background: white;
-  border: 1px solid #E9D5FF;
-  /* Purple 200 */
+  border: 1px solid #e2e8f0;
+  /* Slate 200 */
   border-radius: 1rem;
   transition: all 0.3s ease;
   position: relative;
@@ -126,7 +128,7 @@ body {
 
 .glass-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.1), 0 4px 6px -2px rgba(124, 58, 237, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.1), 0 4px 6px -2px rgba(5, 150, 105, 0.05);
   border-color: var(--color-brand-primary);
 }
 
@@ -142,29 +144,30 @@ body {
 
 /* Buttons */
 .btn {
-  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none;
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 disabled:opacity-50 disabled:pointer-events-none;
 }
 
 .btn-primary {
   background: var(--color-brand-primary);
   color: white;
-  box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3);
 }
 
 .btn-primary:hover {
-  background: #6D28D9;
-  /* Darker Purple */
-  box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.4);
+  background: #047857;
+  /* Darker Emerald */
+  box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.4);
   transform: translateY(-1px);
 }
 
 .btn-secondary {
-  @apply bg-white text-gray-700 border border-purple-200 hover:bg-purple-50 hover:border-purple-300 dark:bg-slate-800 dark:text-gray-200 dark:border-slate-700 dark:hover:bg-slate-700;
+  @apply bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700;
 }
 
 /* Gradient Text Utility */
 .text-gradient {
-  background: linear-gradient(to right, var(--color-brand-primary), #C084FC);
+  background: linear-gradient(to right, var(--color-brand-primary), var(--color-brand-accent));
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -180,14 +183,16 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #E9D5FF;
+  background-color: #cbd5e1;
+  /* Slate 300 */
   border-radius: 4px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #C084FC;
+  background-color: #94a3b8;
+  /* Slate 400 */
 }
 
 .dark ::-webkit-scrollbar-thumb {

@@ -348,11 +348,11 @@ export function IncomeListPage() {
             {/* Header Area */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
-                        <span className="w-2 h-8 rounded-full bg-purple-600 block"></span>
+                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                        <span className="w-2 h-8 rounded-full bg-emerald-600 block"></span>
                         Income
                     </h1>
-                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Track and manage your revenue streams effectively.</p>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-gray-400">Track and manage your revenue streams effectively.</p>
                 </div>
                 <div className="flex items-center gap-3 mt-4 sm:mt-0">
                     <Button variant="outline" leftIcon={Download} onClick={handleExport}>Export Report</Button>
@@ -366,15 +366,15 @@ export function IncomeListPage() {
                 <Card hoverEffect className="p-6">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-sm font-medium text-gray-500 mb-1">Total Revenue</p>
-                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(totalIncome)}</h2>
+                            <p className="text-sm font-medium text-slate-500 mb-1">Total Revenue</p>
+                            <h2 className="text-3xl font-bold text-slate-900">{formatCurrency(totalIncome)}</h2>
                         </div>
-                        <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
+                        <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
                             <DollarSign className="h-6 w-6" />
                         </div>
                     </div>
                     <div className="mt-4 flex items-center">
-                        <span className="text-xs font-semibold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-100">+2.5% vs last month</span>
+                        <span className="text-xs font-semibold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-100">+2.5% vs last month</span>
                     </div>
                 </Card>
 
@@ -382,15 +382,15 @@ export function IncomeListPage() {
                 <Card hoverEffect className="p-6">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-sm font-medium text-gray-500 mb-1">This Month</p>
-                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(thisMonthIncome)}</h2>
+                            <p className="text-sm font-medium text-slate-500 mb-1">This Month</p>
+                            <h2 className="text-3xl font-bold text-slate-900">{formatCurrency(thisMonthIncome)}</h2>
                         </div>
-                        <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
+                        <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
                             <Calendar className="h-6 w-6" />
                         </div>
                     </div>
                     <div className="mt-4 flex items-center">
-                        <span className="text-xs font-semibold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-100 flex items-center gap-1">
+                        <span className="text-xs font-semibold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
                             <TrendingUp className="h-3 w-3" /> 12% increase
                         </span>
                     </div>
@@ -400,10 +400,10 @@ export function IncomeListPage() {
                 <Card hoverEffect className="p-6">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-sm font-medium text-gray-500 mb-1">Avg. Transaction</p>
-                            <h2 className="text-3xl font-bold text-gray-900">{formatCurrency(averageTransaction)}</h2>
+                            <p className="text-sm font-medium text-slate-500 mb-1">Avg. Transaction</p>
+                            <h2 className="text-3xl font-bold text-slate-900">{formatCurrency(averageTransaction)}</h2>
                         </div>
-                        <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
+                        <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
                             <CreditCard className="h-6 w-6" />
                         </div>
                     </div>
@@ -424,7 +424,7 @@ export function IncomeListPage() {
                         <input
                             type="text"
                             placeholder="Search transactions..."
-                            className="block w-full pl-10 pr-3 py-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-[#7C3AED] focus:border-[#7C3AED] bg-white dark:bg-slate-900 dark:text-white transition-all shadow-sm"
+                            className="block w-full pl-10 pr-3 py-2 border-slate-200 dark:border-gray-700 rounded-xl text-sm focus:ring-emerald-600 focus:border-emerald-600 bg-white dark:bg-slate-900 dark:text-white transition-all shadow-sm"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -435,11 +435,11 @@ export function IncomeListPage() {
                 </div>
 
                 {loading ? (
-                    <div className="p-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#7C3AED]" /></div>
+                    <div className="p-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-600" /></div>
                 ) : filteredIncomes.length === 0 ? (
                     <div className="p-16 text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-50 mb-4 animate-pulse">
-                            <TrendingUp className="h-8 w-8 text-[#7C3AED]" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-4 animate-pulse">
+                            <TrendingUp className="h-8 w-8 text-emerald-600" />
                         </div>
                         <h3 className="text-lg font-medium text-gray-900">No income records found</h3>
                         <p className="mt-2 text-gray-500 max-w-sm mx-auto">Get started by adding your first income transaction. It will show up here.</p>
@@ -451,33 +451,33 @@ export function IncomeListPage() {
                         <table className="hidden md:table min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50/50 dark:bg-slate-800/50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Details</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Method</th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Details</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Method</th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-100 dark:divide-gray-800">
                                 {filteredIncomes.map((income, index) => (
-                                    <tr key={income.id} style={{ animationDelay: `${index * 50}ms` }} className="hover:bg-purple-50/50 dark:hover:bg-purple-900/10 transition-colors animate-fade-in-up">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">{formatDate(income.date)}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                    <tr key={income.id} style={{ animationDelay: `${index * 50}ms` }} className="hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-colors animate-fade-in-up">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-medium">{formatDate(income.date)}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-900 dark:text-gray-100">
                                             <div className="font-semibold">{income.description || 'Unspecified Income'}</div>
-                                            {income.customer && <div className="text-xs text-[#7C3AED] mt-0.5 font-medium">{income.customer.name}</div>}
+                                            {income.customer && <div className="text-xs text-emerald-600 mt-0.5 font-medium">{income.customer.name}</div>}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize border border-gray-200">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 capitalize border border-slate-200">
                                                 {income.category.replace('_', ' ')}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{income.payment_method}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#7C3AED] text-right">+{formatCurrency(income.amount)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 capitalize">{income.payment_method}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600 text-right">+{formatCurrency(income.amount)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end space-x-3">
-                                                <button onClick={() => openModal(income)} className="text-gray-400 hover:text-[#7C3AED] transition-colors p-1 hover:bg-purple-50 rounded-full"><Edit className="h-4 w-4" /></button>
-                                                <button onClick={() => handleDelete(income.id)} className="text-gray-400 hover:text-[#7C3AED] transition-colors p-1 hover:bg-purple-50 rounded-full"><Trash2 className="h-4 w-4" /></button>
+                                                <button onClick={() => openModal(income)} className="text-slate-400 hover:text-emerald-600 transition-colors p-1 hover:bg-emerald-50 rounded-full"><Edit className="h-4 w-4" /></button>
+                                                <button onClick={() => handleDelete(income.id)} className="text-slate-400 hover:text-emerald-600 transition-colors p-1 hover:bg-emerald-50 rounded-full"><Trash2 className="h-4 w-4" /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -495,38 +495,38 @@ export function IncomeListPage() {
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
-                                            <p className="text-xs text-gray-500 font-medium">{formatDate(income.date)}</p>
-                                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mt-1">{income.description || 'Unspecified Income'}</h4>
+                                            <p className="text-xs text-slate-500 font-medium">{formatDate(income.date)}</p>
+                                            <h4 className="font-semibold text-slate-900 dark:text-gray-100 mt-1">{income.description || 'Unspecified Income'}</h4>
                                         </div>
-                                        <span className="font-bold text-[#7C3AED] bg-purple-50 px-2 py-1 rounded-lg text-sm">
+                                        <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg text-sm">
                                             +{formatCurrency(income.amount)}
                                         </span>
                                     </div>
 
                                     <div className="flex items-center gap-2 mb-3">
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize border border-gray-200">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 capitalize border border-slate-200">
                                             {income.category.replace('_', ' ')}
                                         </span>
-                                        <span className="text-xs text-gray-400 capitalize">• {income.payment_method}</span>
+                                        <span className="text-xs text-slate-400 capitalize">• {income.payment_method}</span>
                                     </div>
 
                                     {income.customer && (
-                                        <div className="flex items-center gap-1 text-xs text-[#7C3AED] font-medium mb-4 bg-purple-50/50 p-2 rounded-lg">
+                                        <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium mb-4 bg-emerald-50/50 p-2 rounded-lg">
                                             <span>Start from:</span>
                                             {income.customer.name}
                                         </div>
                                     )}
 
-                                    <div className="flex justify-end gap-2 border-t border-gray-100 pt-3">
+                                    <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
                                         <button
                                             onClick={() => openModal(income)}
-                                            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-gray-600 hover:text-[#7C3AED] hover:bg-purple-50 py-2 rounded-lg transition-colors"
+                                            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 py-2 rounded-lg transition-colors"
                                         >
                                             <Edit className="h-4 w-4" /> Edit
                                         </button>
                                         <button
                                             onClick={() => handleDelete(income.id)}
-                                            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-purple-600 hover:bg-purple-50 py-2 rounded-lg transition-colors"
+                                            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 py-2 rounded-lg transition-colors"
                                         >
                                             <Trash2 className="h-4 w-4" /> Delete
                                         </button>
@@ -564,10 +564,10 @@ export function IncomeListPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2 sm:col-span-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
+                            <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center justify-between">
                                 Category
-                                {isAiLoading && <Loader2 className="h-3 w-3 animate-spin text-purple-600" />}
-                                {aiSuggested && !isAiLoading && <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full animate-pulse font-bold">AI Suggestion</span>}
+                                {isAiLoading && <Loader2 className="h-3 w-3 animate-spin text-emerald-600" />}
+                                {aiSuggested && !isAiLoading && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full animate-pulse font-bold">AI Suggestion</span>}
                             </label>
                             <select
                                 {...register('category')}
@@ -576,8 +576,8 @@ export function IncomeListPage() {
                                     setAiSuggested(false); // Clear suggestion highlight on manual change
                                 }}
                                 className={cn(
-                                    "block w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm h-10 px-3 transition-all",
-                                    aiSuggested ? "border-purple-400 ring-1 ring-purple-400" : ""
+                                    "block w-full border-slate-200 rounded-lg shadow-sm focus:ring-emerald-600 focus:border-emerald-600 sm:text-sm h-10 px-3 transition-all",
+                                    aiSuggested ? "border-emerald-400 ring-1 ring-emerald-400" : ""
                                 )}
                             >
                                 <option value="product_sale">Product Sale</option>

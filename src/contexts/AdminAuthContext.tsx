@@ -35,10 +35,16 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     const [adminProfile, setAdminProfile] = useState<AdminUser | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Refs to manage concurrency and avoid redundant fetches
+    // Refs for state to avoid stale closure in timeouts/listeners
+    const loadingRef = useRef(true);
     const fetchInProgress = useRef<string | null>(null);
     const lastFetchTime = useRef<number>(0);
     const mountedRef = useRef(true);
+
+    // Synchronize ref with state
+    useEffect(() => {
+        loadingRef.current = loading;
+    }, [loading]);
 
     const isAdmin = !!adminProfile && adminProfile.is_active;
     const isSuperAdmin = isAdmin && adminProfile?.role === 'super_admin';
@@ -46,13 +52,15 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         mountedRef.current = true;
 
+        // Safety timeout to prevent infinite loading - reduced to 10s for better UX
+        // and made more robust by checking if loading is still true.
         // Safety timeout to prevent infinite loading
         const safetyTimeout = setTimeout(() => {
-            if (mountedRef.current && loading) {
-                console.warn('[AdminAuth] Initializing auth timed out - forcing loading to false');
+            if (mountedRef.current && loadingRef.current) {
+                console.warn('[AdminAuth] Initializing auth timed out (10s) - forcing loading to false');
                 setLoading(false);
             }
-        }, 15000);
+        }, 10000);
 
         async function verifyAndLoad(currentSession: Session | null, source: string) {
             if (!mountedRef.current) return;
@@ -61,20 +69,22 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
             const now = Date.now();
             if (fetchInProgress.current === currentSession?.user?.id && (now - lastFetchTime.current < 2000)) {
                 console.log(`[AdminAuth] Skipping redundant fetch from ${source}`);
+                // CRITICAL: Ensure loading is false even if we skip
+                setLoading(false);
                 return;
             }
 
             console.log(`[AdminAuth] Verifying status from ${source} for:`, currentSession?.user?.id || 'none');
 
-            setSession(currentSession);
-            setUser(currentSession?.user ?? null);
+            try {
+                setSession(currentSession);
+                setUser(currentSession?.user ?? null);
 
-            if (currentSession?.user) {
-                // Lock this fetch
-                fetchInProgress.current = currentSession.user.id;
-                lastFetchTime.current = now;
+                if (currentSession?.user) {
+                    // Lock this fetch
+                    fetchInProgress.current = currentSession.user.id;
+                    lastFetchTime.current = now;
 
-                try {
                     console.log('[AdminAuth] Fetching profile via standard query...');
 
                     const { data: profile, error } = await supabase
@@ -93,38 +103,43 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
                         setAdminProfile(profile as AdminUser);
 
                         // Use a fire-and-forget update that DOES NOT block the UI
-                        // and check session again inside to be absolutely sure
-                        setTimeout(() => {
-                            supabase.from('admin_users')
-                                .update({ last_login_at: new Date().toISOString() })
-                                .eq('user_id', currentSession.user.id)
-                                .then(() => console.log('[AdminAuth] Background login update finished'))
-                                .catch(e => console.warn('[AdminAuth] Background login update failed', e));
+                        setTimeout(async () => {
+                            try {
+                                await supabase.from('admin_users')
+                                    .update({ last_login_at: new Date().toISOString() })
+                                    .eq('user_id', currentSession.user.id);
+                                console.log('[AdminAuth] Background login update finished');
+                            } catch (e) {
+                                console.warn('[AdminAuth] Background login update failed', e);
+                            }
                         }, 100);
                     } else {
                         console.log('[AdminAuth] No admin profile found');
                         setAdminProfile(null);
                     }
-                } catch (err) {
-                    console.error('[AdminAuth] Profile fetch exception:', err);
-                    if (mountedRef.current) setAdminProfile(null);
-                } finally {
+                } else {
+                    setAdminProfile(null);
                     fetchInProgress.current = null;
                 }
-            } else {
-                setAdminProfile(null);
+            } catch (err) {
+                console.error('[AdminAuth] Profile fetch exception:', err);
+                if (mountedRef.current) setAdminProfile(null);
+            } finally {
+                if (mountedRef.current) {
+                    setLoading(false);
+                    console.log(`[AdminAuth] Auth initialization finished (${source})`);
+                }
                 fetchInProgress.current = null;
-            }
-
-            if (mountedRef.current) {
-                setLoading(false);
-                console.log('[AdminAuth] Auth initialization finished');
             }
         }
 
         // Initial check
         supabase.auth.getSession().then(({ data: { session } }) => {
+            console.log('[AdminAuth] Initial session check complete');
             verifyAndLoad(session, 'getSession');
+        }).catch(err => {
+            console.error('[AdminAuth] Initial session check failed:', err);
+            if (mountedRef.current) setLoading(false);
         });
 
         // Listener

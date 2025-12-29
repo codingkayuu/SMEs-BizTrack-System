@@ -20,22 +20,22 @@ const getTrendIcon = (change: number) => {
 };
 
 const getTrendColor = (change: number) => {
-    if (change > 0) return 'text-purple-700 bg-purple-50';
-    if (change < 0) return 'text-purple-400 bg-purple-50/50';
-    return 'text-gray-500 bg-gray-50';
+    if (change > 0) return 'text-emerald-700 bg-emerald-50';
+    if (change < 0) return 'text-emerald-400 bg-emerald-50/50';
+    return 'text-slate-500 bg-slate-50';
 };
 
 export const DashboardStats = memo(function DashboardStats({ today, week, month }: StatsProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Today's Net Profit - PURPLE (Primary Brand) */}
+            {/* Today's Net Profit - EMERALD (Primary Brand) */}
             <Card hoverEffect className="p-6">
                 <div className="flex justify-between items-start">
                     <div>
-                        <p className="text-sm font-medium text-gray-500 mb-1">Today's Net Profit</p>
-                        <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(today.net)}</h3>
+                        <p className="text-sm font-medium text-slate-500 mb-1">Today's Net Profit</p>
+                        <h3 className="text-2xl font-bold text-slate-900">{formatCurrency(today.net)}</h3>
                     </div>
-                    <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
+                    <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
                         <Wallet className="h-6 w-6" />
                     </div>
                 </div>
@@ -52,10 +52,10 @@ export const DashboardStats = memo(function DashboardStats({ today, week, month 
             <Card hoverEffect className="p-6">
                 <div className="flex justify-between items-start">
                     <div>
-                        <p className="text-sm font-medium text-gray-500 mb-1">This Week's Income</p>
-                        <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(week.income)}</h3>
+                        <p className="text-sm font-medium text-slate-500 mb-1">This Week's Income</p>
+                        <h3 className="text-2xl font-bold text-slate-900">{formatCurrency(week.income)}</h3>
                     </div>
-                    <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
+                    <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
                         <DollarSign className="h-6 w-6" />
                     </div>
                 </div>
@@ -68,14 +68,14 @@ export const DashboardStats = memo(function DashboardStats({ today, week, month 
                 </div>
             </Card>
 
-            {/* This Month's Expenses - PINK/RED (Warning) */}
+            {/* This Month's Expenses - SLATE (Warning) */}
             <Card hoverEffect className="p-6">
                 <div className="flex justify-between items-start">
                     <div>
-                        <p className="text-sm font-medium text-gray-500 mb-1">This Month's Expenses</p>
-                        <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(month.expense)}</h3>
+                        <p className="text-sm font-medium text-slate-500 mb-1">This Month's Expenses</p>
+                        <h3 className="text-2xl font-bold text-slate-900">{formatCurrency(month.expense)}</h3>
                     </div>
-                    <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
+                    <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
                         <ShoppingCart className="h-6 w-6" />
                     </div>
                 </div>
@@ -88,14 +88,14 @@ export const DashboardStats = memo(function DashboardStats({ today, week, month 
                 </div>
             </Card>
 
-            {/* This Month's Profit - BLUE/INDIGO (Info) */}
+            {/* This Month's Profit - EMERALD (Info) */}
             <Card hoverEffect className="p-6">
                 <div className="flex justify-between items-start">
                     <div>
-                        <p className="text-sm font-medium text-gray-500 mb-1">This Month's Profit</p>
-                        <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(month.net)}</h3>
+                        <p className="text-sm font-medium text-slate-500 mb-1">This Month's Profit</p>
+                        <h3 className="text-2xl font-bold text-slate-900">{formatCurrency(month.net)}</h3>
                     </div>
-                    <div className="p-3 bg-purple-50 rounded-2xl text-purple-600 shadow-sm">
+                    <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
                         <PiggyBank className="h-6 w-6" />
                     </div>
                 </div>

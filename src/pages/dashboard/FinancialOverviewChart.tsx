@@ -135,10 +135,10 @@ export const FinancialOverviewChart = memo(function FinancialOverviewChart() {
     return (
         <Card className="col-span-1 lg:col-span-2 shadow-sm border-gray-100 h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-8">
-                <CardTitle className="text-lg font-bold text-gray-800">Financial Overview</CardTitle>
+                <CardTitle className="text-lg font-bold text-slate-800">Financial Overview</CardTitle>
                 <div className="flex space-x-2">
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-purple-600 text-white border border-purple-700">Income</span>
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-purple-100 text-purple-600 border border-purple-200">Expenses</span>
+                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-600 text-white border border-emerald-700 shadow-sm">Income</span>
+                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 shadow-sm">Expenses</span>
                 </div>
             </CardHeader>
             <CardContent>
@@ -147,12 +147,12 @@ export const FinancialOverviewChart = memo(function FinancialOverviewChart() {
                         <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.1} />
-                                    <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
+                                    <stop offset="5%" stopColor="#059669" stopOpacity={0.15} />
+                                    <stop offset="95%" stopColor="#059669" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#A78BFA" stopOpacity={0.1} />
-                                    <stop offset="95%" stopColor="#A78BFA" stopOpacity={0} />
+                                    <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.15} />
+                                    <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -183,18 +183,20 @@ export const FinancialOverviewChart = memo(function FinancialOverviewChart() {
                             <Area
                                 type="monotone"
                                 dataKey="income"
-                                stroke="#7C3AED"
+                                stroke="#059669"
                                 strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorIncome)"
+                                animationDuration={1500}
                             />
                             <Area
                                 type="monotone"
                                 dataKey="expense"
-                                stroke="#EF4444"
+                                stroke="#94a3b8"
                                 strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorExpense)"
+                                animationDuration={1500}
                             />
                         </AreaChart>
                     </ResponsiveContainer>

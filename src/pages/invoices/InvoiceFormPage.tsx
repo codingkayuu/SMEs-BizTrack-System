@@ -125,21 +125,21 @@ export function InvoiceFormPage() {
         <div className="space-y-6 max-w-4xl mx-auto animate-fade-in-up duration-500">
             <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                    <button onClick={() => navigate('/invoices')} className="mr-4 text-gray-500 hover:text-[#7C3AED] transition-colors p-2 hover:bg-purple-50 rounded-full">
+                    <button onClick={() => navigate('/invoices')} className="mr-4 text-slate-500 hover:text-emerald-600 transition-colors p-2 hover:bg-emerald-50 rounded-full">
                         <ArrowLeft className="h-6 w-6" />
                     </button>
-                    <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">{isEdit ? 'Edit Invoice' : 'New Invoice'}</h1>
+                    <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{isEdit ? 'Edit Invoice' : 'New Invoice'}</h1>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                 {/* Header Info */}
-                <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-purple-100 dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-6 stagger-1 animate-fade-in-up">
+                <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-6 stagger-1 animate-fade-in-up">
                     <div className="relative z-10">
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Customer</label>
+                        <label className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-2">Customer</label>
                         <select
                             {...register('customerId')}
-                            className="mt-1 block w-full rounded-xl border-gray-200 dark:border-gray-700 shadow-sm focus:border-[#7C3AED] focus:ring-[#7C3AED] bg-white dark:bg-slate-900 sm:text-sm py-3 transition-all"
+                            className="mt-1 block w-full rounded-xl border-slate-200 dark:border-gray-700 shadow-sm focus:border-emerald-600 focus:ring-emerald-600 bg-white dark:bg-slate-900 sm:text-sm py-3 transition-all"
                         >
                             <option value="">Select a customer</option>
                             {customers.map(c => (
@@ -151,27 +151,27 @@ export function InvoiceFormPage() {
 
                     <div className="grid grid-cols-2 gap-4 relative z-10">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Invoice Date</label>
-                            <input type="date" {...register('date')} className="mt-1 block w-full rounded-xl border-gray-200 dark:border-gray-700 shadow-sm focus:border-[#7C3AED] focus:ring-[#7C3AED] bg-white dark:bg-slate-900 sm:text-sm py-3 transition-all" />
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-2">Invoice Date</label>
+                            <input type="date" {...register('date')} className="mt-1 block w-full rounded-xl border-slate-200 dark:border-gray-700 shadow-sm focus:border-emerald-600 focus:ring-emerald-600 bg-white dark:bg-slate-900 sm:text-sm py-3 transition-all" />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Due Date</label>
-                            <input type="date" {...register('dueDate')} className="mt-1 block w-full rounded-xl border-gray-200 dark:border-gray-700 shadow-sm focus:border-[#7C3AED] focus:ring-[#7C3AED] bg-white dark:bg-slate-900 sm:text-sm py-3 transition-all" />
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-2">Due Date</label>
+                            <input type="date" {...register('dueDate')} className="mt-1 block w-full rounded-xl border-slate-200 dark:border-gray-700 shadow-sm focus:border-emerald-600 focus:ring-emerald-600 bg-white dark:bg-slate-900 sm:text-sm py-3 transition-all" />
                         </div>
                     </div>
                 </div>
 
                 {/* Line Items */}
-                <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-purple-100 dark:border-gray-700 stagger-2 animate-fade-in-up">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Items</h3>
+                <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-gray-700 stagger-2 animate-fade-in-up">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Items</h3>
                     <div className="space-y-4">
                         {fields.map((field, index) => (
-                            <div key={field.id} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-100 dark:border-gray-700 transition-all hover:border-[#7C3AED]/30">
+                            <div key={field.id} className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-gray-700 transition-all hover:border-emerald-600/30 shadow-sm">
                                 <div className="flex-1">
                                     <input
                                         placeholder="Description"
                                         {...register(`items.${index}.description`)}
-                                        className="block w-full rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm focus:border-[#7C3AED] focus:ring-[#7C3AED] sm:text-sm py-2"
+                                        className="block w-full rounded-lg border-slate-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm focus:border-emerald-600 focus:ring-emerald-600 sm:text-sm py-2"
                                     />
                                 </div>
                                 <div className="w-24">
@@ -179,7 +179,7 @@ export function InvoiceFormPage() {
                                         type="number"
                                         placeholder="Qty"
                                         {...register(`items.${index}.quantity`, { valueAsNumber: true })}
-                                        className="block w-full rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm focus:border-[#7C3AED] focus:ring-[#7C3AED] sm:text-sm py-2"
+                                        className="block w-full rounded-lg border-slate-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm focus:border-emerald-600 focus:ring-emerald-600 sm:text-sm py-2"
                                     />
                                 </div>
                                 <div className="w-32">
@@ -187,7 +187,7 @@ export function InvoiceFormPage() {
                                         type="number"
                                         placeholder="Price"
                                         {...register(`items.${index}.unitPrice`, { valueAsNumber: true })}
-                                        className="block w-full rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm focus:border-[#7C3AED] focus:ring-[#7C3AED] sm:text-sm py-2"
+                                        className="block w-full rounded-lg border-slate-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm focus:border-emerald-600 focus:ring-emerald-600 sm:text-sm py-2"
                                     />
                                 </div>
                                 <div className="w-24 py-2 text-right font-bold text-gray-900 dark:text-white">
@@ -203,7 +203,7 @@ export function InvoiceFormPage() {
                     <button
                         type="button"
                         onClick={() => append({ description: '', quantity: 1, unitPrice: 0 })}
-                        className="mt-6 inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-xl text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                        className="mt-6 inline-flex items-center px-4 py-2 border border-slate-200 dark:border-gray-600 shadow-sm text-sm font-medium rounded-xl text-slate-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-emerald-50 hover:text-emerald-700 transition-all"
                     >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Item
@@ -212,29 +212,29 @@ export function InvoiceFormPage() {
                     {/* Totals */}
                     <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8 flex justify-end">
                         <div className="w-64 space-y-3">
-                            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex justify-between text-sm text-slate-600 dark:text-gray-400">
                                 <span>Subtotal</span>
                                 <span>{formatCurrency(subtotal)}</span>
                             </div>
-                            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex justify-between text-sm text-slate-600 dark:text-gray-400">
                                 <span>Tax (0%)</span>
                                 <span>{formatCurrency(tax)}</span>
                             </div>
-                            <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white pt-3 border-t border-gray-200 dark:border-gray-700">
+                            <div className="flex justify-between text-lg font-bold text-slate-900 dark:text-white pt-3 border-t border-slate-200 dark:border-gray-700">
                                 <span>Total</span>
-                                <span className="text-[#7C3AED]">{formatCurrency(total)}</span>
+                                <span className="text-emerald-600">{formatCurrency(total)}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Notes */}
-                <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-purple-100 dark:border-gray-700 stagger-3 animate-fade-in-up">
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Notes</label>
+                <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-gray-700 stagger-3 animate-fade-in-up">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-2">Notes</label>
                     <textarea
                         {...register('notes')}
                         rows={3}
-                        className="block w-full rounded-xl border-gray-200 dark:border-gray-700 shadow-sm focus:border-[#7C3AED] focus:ring-[#7C3AED] bg-white dark:bg-slate-900 sm:text-sm p-4 transition-all"
+                        className="block w-full rounded-xl border-slate-200 dark:border-gray-700 shadow-sm focus:border-emerald-600 focus:ring-emerald-600 bg-white dark:bg-slate-900 sm:text-sm p-4 transition-all"
                         placeholder="Payment terms, thank you note, etc."
                     />
                 </div>
@@ -243,7 +243,7 @@ export function InvoiceFormPage() {
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="inline-flex items-center px-8 py-4 border border-transparent rounded-full shadow-lg text-lg font-medium text-white bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] hover:from-[#6D28D9] hover:to-[#5B21B6] hover:shadow-xl hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7C3AED] disabled:opacity-50 transition-all duration-300"
+                        className="inline-flex items-center px-8 py-4 border border-transparent rounded-full shadow-lg text-lg font-medium text-white bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 hover:shadow-xl hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 disabled:opacity-50 transition-all duration-300"
                     >
                         {submitting ? (
                             <>

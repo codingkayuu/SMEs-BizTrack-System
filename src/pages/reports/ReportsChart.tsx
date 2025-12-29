@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, ComposedChart } from 'recharts';
+import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, ComposedChart } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { formatCurrency } from '../../lib/utils';
 
@@ -10,8 +10,8 @@ export function ReportsChart({ data }: ReportsChartProps) {
     return (
 
         <Card className="col-span-1 lg:col-span-2 shadow-md border-gray-100 dark:border-gray-800 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="bg-gradient-to-r from-purple-50/50 to-white dark:from-slate-800 dark:to-slate-800/80 border-b border-gray-100 dark:border-gray-700/50">
-                <CardTitle className="text-xl font-extrabold text-purple-700 tracking-tight flex items-center gap-2">
+            <CardHeader className="bg-gradient-to-r from-emerald-50/50 to-white dark:from-slate-800 dark:to-slate-800/80 border-b border-gray-100 dark:border-gray-700/50">
+                <CardTitle className="text-xl font-extrabold text-emerald-700 tracking-tight flex items-center gap-2">
                     Income vs Expenses
                 </CardTitle>
                 <p className="text-sm text-gray-500 font-medium font-inter">Historical performance and AI-powered projections</p>
@@ -42,10 +42,10 @@ export function ReportsChart({ data }: ReportsChartProps) {
                                     if (active && payload && payload.length) {
                                         const isProjected = payload[0].payload.isProjected;
                                         return (
-                                            <div className="bg-slate-900/95 backdrop-blur-md border border-purple-500/20 rounded-xl p-3 shadow-xl">
+                                            <div className="bg-slate-900/95 backdrop-blur-md border border-emerald-500/20 rounded-xl p-3 shadow-xl">
                                                 <p className="text-xs font-bold text-gray-400 mb-2 flex items-center justify-between">
                                                     {label}
-                                                    {isProjected && <span className="ml-2 px-1.5 py-0.5 bg-purple-500/20 text-purple-300 rounded text-[9px] uppercase tracking-wider">AI Projected</span>}
+                                                    {isProjected && <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded text-[9px] uppercase tracking-wider">AI Projected</span>}
                                                 </p>
                                                 {payload.map((entry: any) => (
                                                     <div key={entry.name} className="flex items-center justify-between gap-8 py-1">
@@ -76,7 +76,7 @@ export function ReportsChart({ data }: ReportsChartProps) {
                                 type="monotone"
                                 dataKey={(entry) => entry.isProjected ? entry.Profit + (entry.Profit * 0.2) : null} // Rough upper bound for Profit if not explicitly in data
                                 stroke="none"
-                                fill="#7C3AED"
+                                fill="#059669"
                                 fillOpacity={0.05}
                                 connectNulls
                             />
@@ -91,18 +91,18 @@ export function ReportsChart({ data }: ReportsChartProps) {
                                     <rect
                                         key={`cell-income-${index}`}
                                         fill={entry.isProjected ? "url(#colorIncomeProjected)" : "url(#colorIncome)"}
-                                        stroke={entry.isProjected ? "#7C3AED" : "none"}
+                                        stroke={entry.isProjected ? "#059669" : "none"}
                                         strokeDasharray={entry.isProjected ? "4 4" : "0"}
                                     />
                                 ))}
                                 <defs>
                                     <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#7C3AED" stopOpacity={1} />
-                                        <stop offset="100%" stopColor="#6D28D9" stopOpacity={0.8} />
+                                        <stop offset="0%" stopColor="#059669" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#047857" stopOpacity={0.8} />
                                     </linearGradient>
                                     <linearGradient id="colorIncomeProjected" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#7C3AED" stopOpacity={0.4} />
-                                        <stop offset="100%" stopColor="#6D28D9" stopOpacity={0.2} />
+                                        <stop offset="0%" stopColor="#059669" stopOpacity={0.4} />
+                                        <stop offset="100%" stopColor="#047857" stopOpacity={0.2} />
                                     </linearGradient>
                                 </defs>
                             </Bar>
@@ -116,18 +116,18 @@ export function ReportsChart({ data }: ReportsChartProps) {
                                     <rect
                                         key={`cell-expense-${index}`}
                                         fill={entry.isProjected ? "url(#colorExpenseProjected)" : "url(#colorExpense)"}
-                                        stroke={entry.isProjected ? "#A78BFA" : "none"}
+                                        stroke={entry.isProjected ? "#64748b" : "none"}
                                         strokeDasharray={entry.isProjected ? "4 4" : "0"}
                                     />
                                 ))}
                                 <defs>
                                     <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#DDD6FE" stopOpacity={1} />
-                                        <stop offset="100%" stopColor="#C4B5FD" stopOpacity={0.8} />
+                                        <stop offset="0%" stopColor="#94a3b8" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#64748b" stopOpacity={0.8} />
                                     </linearGradient>
                                     <linearGradient id="colorExpenseProjected" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#DDD6FE" stopOpacity={0.4} />
-                                        <stop offset="100%" stopColor="#C4B5FD" stopOpacity={0.2} />
+                                        <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.4} />
+                                        <stop offset="100%" stopColor="#64748b" stopOpacity={0.2} />
                                     </linearGradient>
                                 </defs>
                             </Bar>

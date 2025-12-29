@@ -69,12 +69,12 @@ export function InvoiceListPage() {
         <div className="space-y-6 max-w-7xl mx-auto animate-fade-in-up duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Invoices</h1>
-                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Manage and track your customer invoices.</p>
+                    <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Invoices</h1>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-gray-400">Manage and track your customer invoices.</p>
                 </div>
                 <Link
                     to="/invoices/new"
-                    className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 border border-transparent rounded-full shadow-lg text-sm font-medium text-white bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] hover:from-[#6D28D9] hover:to-[#5B21B6] hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                    className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 border border-transparent rounded-full shadow-lg text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
                     <Plus className="h-5 w-5 mr-2" />
                     Create Invoice
@@ -82,14 +82,14 @@ export function InvoiceListPage() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-purple-100 dark:border-gray-700 flex flex-col md:flex-row gap-4 stagger-1 animate-fade-in-up">
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-gray-700 flex flex-col md:flex-row gap-4 stagger-1 animate-fade-in-up">
                 <div className="flex-1 relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Search className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         type="text"
-                        className="block w-full pl-10 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-[#7C3AED] focus:border-[#7C3AED] bg-white dark:bg-slate-900 sm:text-sm py-2.5 transition-shadow"
+                        className="block w-full pl-10 border-slate-200 dark:border-gray-700 rounded-xl focus:ring-emerald-600 focus:border-emerald-600 bg-white dark:bg-slate-900 sm:text-sm py-2.5 transition-shadow shadow-sm"
                         placeholder="Search invoice # or customer..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -97,7 +97,7 @@ export function InvoiceListPage() {
                 </div>
                 <div className="w-full md:w-48">
                     <select
-                        className="block w-full border-gray-200 dark:border-gray-700 rounded-xl focus:ring-[#7C3AED] focus:border-[#7C3AED] bg-white dark:bg-slate-900 sm:text-sm py-2.5"
+                        className="block w-full border-slate-200 dark:border-gray-700 rounded-xl focus:ring-emerald-600 focus:border-emerald-600 bg-white dark:bg-slate-900 sm:text-sm py-2.5 shadow-sm"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value as any)}
                     >
@@ -110,54 +110,54 @@ export function InvoiceListPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-white dark:bg-slate-800 shadow-sm rounded-2xl border border-purple-100 dark:border-gray-700 overflow-hidden stagger-2 animate-fade-in-up">
+            <div className="bg-white dark:bg-slate-800 shadow-sm rounded-2xl border border-slate-200 dark:border-gray-700 overflow-hidden stagger-2 animate-fade-in-up">
                 {loading ? (
                     <div className="p-12 flex justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-[#7C3AED]" />
+                        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
                     </div>
                 ) : filteredInvoices.length === 0 ? (
                     <div className="p-16 text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-50 mb-4 animate-pulse">
-                            <FileText className="h-8 w-8 text-[#7C3AED]" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-4 animate-pulse">
+                            <FileText className="h-8 w-8 text-emerald-600" />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">No invoices found</h3>
-                        <p className="mt-2 text-gray-500 dark:text-gray-400">Get started by creating a new invoice.</p>
-                        <Link to="/invoices/new" className="mt-6 inline-block text-[#7C3AED] font-medium hover:underline">Create your first invoice &rarr;</Link>
+                        <h3 className="text-lg font-medium text-slate-900 dark:text-white">No invoices found</h3>
+                        <p className="mt-2 text-slate-500 dark:text-gray-400">Get started by creating a new invoice.</p>
+                        <Link to="/invoices/new" className="mt-6 inline-block text-emerald-600 font-medium hover:underline">Create your first invoice &rarr;</Link>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="hidden md:table min-w-full divide-y divide-purple-100 dark:divide-gray-700">
-                            <thead className="bg-purple-50/50 dark:bg-slate-800/50">
+                        <table className="hidden md:table min-w-full divide-y divide-slate-100 dark:divide-gray-700">
+                            <thead className="bg-emerald-50/50 dark:bg-slate-800/50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoice #</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Invoice #</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                                     <th scope="col" className="relative px-6 py-4"><span className="sr-only">Actions</span></th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-100 dark:divide-gray-800">
                                 {filteredInvoices.map((invoice, index) => (
-                                    <tr key={invoice.id} style={{ animationDelay: `${index * 50}ms` }} className="hover:bg-purple-50/50 dark:hover:bg-purple-900/10 transition-colors animate-fade-in-up">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#7C3AED] hover:text-[#6D28D9]">
+                                    <tr key={invoice.id} style={{ animationDelay: `${index * 50}ms` }} className="hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-colors animate-fade-in-up">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600 hover:text-emerald-700">
                                             <Link to={`/invoices/${invoice.id}`}>{invoice.invoice_number}</Link>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                             {formatDate(invoice.date)}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 font-medium">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-gray-200 font-medium">
                                             {invoice.customer?.name || 'Unknown'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900 dark:text-white">
                                             {formatCurrency(invoice.total_amount)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={cn(
                                                 "px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border",
-                                                invoice.status === 'paid' ? 'bg-[#7C3AED]/10 text-[#7C3AED] border-[#7C3AED]/20' :
-                                                    invoice.status === 'unpaid' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20' :
-                                                        'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20'
+                                                invoice.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                                    invoice.status === 'unpaid' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                                        'bg-red-50 text-red-700 border-red-100'
                                             )}>
                                                 {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                                             </span>
@@ -165,12 +165,12 @@ export function InvoiceListPage() {
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button
                                                 onClick={() => generatePDF(invoice)}
-                                                className="text-gray-400 hover:text-[#7C3AED] mr-3 transition-colors p-1 hover:bg-purple-50 rounded-full"
+                                                className="text-slate-400 hover:text-emerald-600 mr-3 transition-colors p-1 hover:bg-emerald-50 rounded-full"
                                                 title="Download PDF"
                                             >
                                                 <Download className="h-5 w-5" />
                                             </button>
-                                            <Link to={`/invoices/${invoice.id}`} className="text-gray-400 hover:text-purple-600 p-1 hover:bg-gray-100 rounded-full inline-block align-middle transition-colors">
+                                            <Link to={`/invoices/${invoice.id}`} className="text-slate-400 hover:text-emerald-600 p-1 hover:bg-emerald-50 rounded-full inline-block align-middle transition-colors">
                                                 <MoreVertical className="h-5 w-5" />
                                             </Link>
                                         </td>
@@ -192,38 +192,38 @@ export function InvoiceListPage() {
                                             <div className="flex items-center gap-2">
                                                 <span className={cn(
                                                     "px-2 py-0.5 inline-flex text-xs leading-4 font-bold rounded-full border",
-                                                    invoice.status === 'paid' ? 'bg-[#7C3AED]/10 text-[#7C3AED] border-[#7C3AED]/20' :
-                                                        invoice.status === 'unpaid' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20' :
-                                                            'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20'
+                                                    invoice.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                                        invoice.status === 'unpaid' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                                            'bg-red-50 text-red-700 border-red-100'
                                                 )}>
                                                     {invoice.status.toUpperCase()}
                                                 </span>
-                                                <span className="text-xs text-gray-500">{formatDate(invoice.date)}</span>
+                                                <span className="text-xs text-slate-500">{formatDate(invoice.date)}</span>
                                             </div>
-                                            <Link to={`/invoices/${invoice.id}`} className="block font-bold text-[#7C3AED] mt-1 hover:underline">
+                                            <Link to={`/invoices/${invoice.id}`} className="block font-bold text-emerald-600 mt-1 hover:underline">
                                                 {invoice.invoice_number}
                                             </Link>
-                                            <p className="text-sm text-gray-900 dark:text-gray-200 font-medium">
+                                            <p className="text-sm text-slate-900 dark:text-gray-200 font-medium">
                                                 {invoice.customer?.name || 'Unknown'}
                                             </p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="block text-lg font-bold text-gray-900 dark:text-white">
+                                            <span className="block text-lg font-bold text-slate-900 dark:text-white">
                                                 {formatCurrency(invoice.total_amount)}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div className="flex justify-end gap-3 border-t border-gray-100 pt-3 mt-3">
+                                    <div className="flex justify-end gap-3 border-t border-slate-100 pt-3 mt-3">
                                         <button
                                             onClick={() => generatePDF(invoice)}
-                                            className="flex items-center gap-1 text-xs text-gray-500 hover:text-[#7C3AED] transition-colors"
+                                            className="flex items-center gap-1 text-xs text-slate-500 hover:text-emerald-600 transition-colors"
                                         >
                                             <Download className="h-4 w-4" /> PDF
                                         </button>
                                         <Link
                                             to={`/invoices/${invoice.id}`}
-                                            className="flex items-center gap-1 text-xs font-medium text-[#7C3AED] hover:text-[#6D28D9] transition-colors"
+                                            className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
                                         >
                                             View Details &rarr;
                                         </Link>
