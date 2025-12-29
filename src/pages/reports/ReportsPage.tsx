@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { Download, Loader2, Lightbulb, Calendar, TrendingUp, ChevronDown } from 'lucide-react';
+import { Download, Loader2, Lightbulb, Calendar, TrendingUp, ChevronDown, Sparkles, AlertCircle, Target } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatCurrency, cn } from '../../lib/utils';
@@ -10,6 +10,7 @@ import { CategoryBreakdownChart } from './CategoryBreakdownChart';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { debounce } from '../../lib/performance';
+import { aiService } from '../../lib/ai';
 
 // Colors for pie chart - maintaining pale purple theme
 const COLORS = ['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE'];
@@ -28,6 +29,16 @@ export function ReportsPage() {
     const [dateRange, setDateRange] = useState<DateRangeOption>('month');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // AI States
+    const [showAI, setShowAI] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiInsights, setAiInsights] = useState<any[]>([]);
+    const [aiForecastMeta, setAiForecastMeta] = useState<{
+        incomeTrend: number;
+        expenseTrend: number;
+        seasonality: string;
+    } | null>(null);
 
     const rangeLabels: Record<DateRangeOption, string> = {
         daily: 'Daily',
@@ -157,6 +168,58 @@ export function ReportsPage() {
                 value,
                 color: COLORS[index % COLORS.length]
             })).sort((a, b) => b.value - a.value);
+
+            if (showAI && incomes.length >= 2 && profile?.id) {
+                setAiLoading(true);
+                try {
+                    const forecast = await aiService.getForecast(profile.id, 30);
+                    if (forecast && !forecast.error) {
+                        setAiForecastMeta({
+                            incomeTrend: forecast.income_trend,
+                            expenseTrend: forecast.expense_trend,
+                            seasonality: forecast.seasonality
+                        });
+
+                        // Group forecast by month to match groupedData
+                        const futureData: any[] = [];
+                        const months = new Set<string>();
+
+                        forecast.income_forecast.forEach((f: any) => months.add(f.ds.slice(0, 7)));
+
+                        Array.from(months).sort().forEach(month => {
+                            const inc = forecast.income_forecast
+                                .filter((f: any) => f.ds.startsWith(month))
+                                .reduce((sum: number, f: any) => sum + f.yhat, 0);
+                            const exp = forecast.expense_forecast
+                                .filter((f: any) => f.ds.startsWith(month))
+                                .reduce((sum: number, f: any) => sum + f.yhat, 0);
+
+                            futureData.push({
+                                name: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+                                fullName: month,
+                                Income: inc,
+                                Expense: exp,
+                                Profit: inc - exp,
+                                isProjected: true
+                            });
+                        });
+
+                        groupedData = [...groupedData, ...futureData];
+                    }
+                } catch (err) {
+                    console.error("AI Forecast error:", err);
+                } finally {
+                    setAiLoading(false);
+                }
+            }
+
+            // Fetch AI Insights (Anomalies)
+            if (expenses.length > 0 && profile?.id) {
+                const insightsData = await aiService.getInsights(profile.id, expenses);
+                if (insightsData && insightsData.insights) {
+                    setAiInsights(insightsData.insights);
+                }
+            }
 
             setReportData({
                 monthly: groupedData,
@@ -327,6 +390,19 @@ export function ReportsPage() {
                     </div>
 
                     <Button
+                        variant={showAI ? "primary" : "outline"}
+                        leftIcon={TrendingUp}
+                        onClick={() => setShowAI(!showAI)}
+                        isLoading={aiLoading}
+                        className={cn(
+                            "rounded-xl shadow-sm transition-all border-purple-100",
+                            showAI ? "bg-purple-600 text-white border-transparent" : "text-purple-600 hover:bg-purple-50"
+                        )}
+                    >
+                        {showAI ? "AI Projections ON" : "AI Projections"}
+                    </Button>
+
+                    <Button
                         variant="primary"
                         leftIcon={Download}
                         onClick={downloadPDF}
@@ -362,6 +438,61 @@ export function ReportsPage() {
                         </Card>
                     </div>
 
+                    {/* AI Predictive Summary Cards */}
+                    {showAI && aiForecastMeta && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-2 animate-in fade-in slide-in-from-top-4 duration-500">
+                            <Card className="p-5 border-none bg-purple-900/10 dark:bg-purple-900/30 backdrop-blur-sm shadow-sm relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                                    <TrendingUp className="h-10 w-10 text-purple-600" />
+                                </div>
+                                <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1">Growth Trend</p>
+                                <p className={cn(
+                                    "text-2xl font-black",
+                                    aiForecastMeta.incomeTrend >= 0 ? "text-green-600" : "text-red-600"
+                                )}>
+                                    {aiForecastMeta.incomeTrend > 0 ? '+' : ''}{aiForecastMeta.incomeTrend}%
+                                </p>
+                                <p className="text-[10px] text-gray-500 mt-1">Projected revenue momentum</p>
+                            </Card>
+
+                            <Card className="p-5 border-none bg-purple-900/10 dark:bg-purple-900/30 backdrop-blur-sm shadow-sm relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                                    <Sparkles className="h-10 w-10 text-purple-600" />
+                                </div>
+                                <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1">Seasonality Mode</p>
+                                <p className="text-2xl font-black text-purple-900 dark:text-purple-100 capitalize">
+                                    {aiForecastMeta.seasonality}
+                                </p>
+                                <p className="text-[10px] text-gray-500 mt-1">Patterns detected in history</p>
+                            </Card>
+
+                            <Card className="p-5 border-none bg-purple-900/10 dark:bg-purple-900/30 backdrop-blur-sm shadow-sm relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                                    <AlertCircle className="h-10 w-10 text-purple-600" />
+                                </div>
+                                <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1">Exp. Stability</p>
+                                <p className={cn(
+                                    "text-2xl font-black",
+                                    Math.abs(aiForecastMeta.expenseTrend) < 5 ? "text-green-600" : "text-amber-600"
+                                )}>
+                                    {Math.abs(aiForecastMeta.expenseTrend) < 5 ? 'High' : 'Moderate'}
+                                </p>
+                                <p className="text-[10px] text-gray-500 mt-1">Expense predictability score</p>
+                            </Card>
+
+                            <Card className="p-5 border-none bg-purple-600 text-white shadow-xl relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                                    <Target className="h-10 w-10 text-white" />
+                                </div>
+                                <p className="text-[10px] font-bold text-purple-100 uppercase tracking-widest mb-1">Projected Next Month</p>
+                                <p className="text-2xl font-black">
+                                    {formatCurrency(reportData.monthly.filter(m => m.isProjected)[0]?.Profit || 0)}
+                                </p>
+                                <p className="text-[10px] text-purple-100 mt-1">AI-calculated net outcome</p>
+                            </Card>
+                        </div>
+                    )}
+
                     {/* Charts Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 content-stretch stagger-2 animate-fade-in-up">
                         <ReportsChart data={reportData.monthly} />
@@ -378,14 +509,21 @@ export function ReportsPage() {
                                         <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                                             <Lightbulb className="h-5 w-5 text-yellow-300" />
                                         </div>
-                                        <h3 className="font-bold text-lg">FinFlow ZM Tip</h3>
+                                        <h3 className="font-bold text-lg">FinFlow ZM Insight</h3>
                                     </div>
                                     <p className="text-purple-100 text-sm leading-relaxed">
-                                        Your highest expense is <span className="font-bold text-white border-b border-white/30 pb-0.5">{reportData.categoryData[0]?.name || 'N/A'}</span>.
-                                        Consider reviewing your suppliers or budget for this category.
+                                        {aiInsights.length > 0
+                                            ? aiInsights[0].message
+                                            : `Your highest expense is ${reportData.categoryData[0]?.name || 'N/A'}. Consider reviewing your budget for this category.`}
                                     </p>
+                                    <div className="mt-4 p-3 bg-white/10 rounded-lg border border-white/20">
+                                        <p className="text-[10px] text-purple-200 uppercase font-bold tracking-widest mb-1">Recommended Action</p>
+                                        <p className="text-xs text-white">
+                                            {aiInsights.length > 0 ? aiInsights[0].action : "Keep monitoring your spending patterns weekly."}
+                                        </p>
+                                    </div>
                                     <button className="mt-5 w-full py-2.5 bg-white text-purple-700 hover:bg-purple-50 rounded-xl text-sm font-bold transition-colors shadow-sm">
-                                        Optimize Spending
+                                        Learn More
                                     </button>
                                 </div>
                             </Card>

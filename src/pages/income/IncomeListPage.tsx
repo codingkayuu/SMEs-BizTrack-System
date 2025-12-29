@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import type { Income, Customer } from '../../types';
-import { formatCurrency, formatDate } from '../../lib/utils';
+import { formatCurrency, formatDate, cn } from '../../lib/utils';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,7 @@ import { Button } from '../../components/ui/Button';
 import { debounce } from '../../lib/performance';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { aiService } from '../../lib/ai';
 
 const incomeSchema = z.object({
     date: z.string(),
@@ -39,7 +40,11 @@ export function IncomeListPage() {
     // Search & Filter
     const [searchTerm, setSearchTerm] = useState('');
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<IncomeFormData>({
+    // AI States
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [aiSuggested, setAiSuggested] = useState(false);
+
+    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<IncomeFormData>({
         resolver: zodResolver(incomeSchema),
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
@@ -178,8 +183,36 @@ export function IncomeListPage() {
     const closeModal = () => {
         setIsModalOpen(false);
         setEditingIncome(null);
+        setAiSuggested(false);
         reset();
     };
+
+    // AI Categorization Logic
+    const watchedDescription = watch('description');
+
+    useEffect(() => {
+        if (!watchedDescription || watchedDescription.length < 5 || editingIncome) return;
+
+        const timer = setTimeout(async () => {
+            setIsAiLoading(true);
+            const prediction = await aiService.predictCategory(watchedDescription);
+
+            if (prediction && prediction.confidence > 0.6) {
+                const mappedCategory = aiService.mapToFrontendCategory(
+                    prediction.suggested_category,
+                    ['product_sale', 'service', 'other']
+                );
+
+                if (mappedCategory) {
+                    setValue('category', mappedCategory as any);
+                    setAiSuggested(true);
+                }
+            }
+            setIsAiLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [watchedDescription, setValue, editingIncome]);
 
     // Calculate totals with memoization
     const { totalIncome, thisMonthIncome, averageTransaction } = useMemo(() => {
@@ -531,8 +564,22 @@ export function IncomeListPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2 sm:col-span-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                            <select {...register('category')} className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm h-10 px-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
+                                Category
+                                {isAiLoading && <Loader2 className="h-3 w-3 animate-spin text-purple-600" />}
+                                {aiSuggested && !isAiLoading && <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full animate-pulse font-bold">AI Suggestion</span>}
+                            </label>
+                            <select
+                                {...register('category')}
+                                onChange={(e) => {
+                                    register('category').onChange(e);
+                                    setAiSuggested(false); // Clear suggestion highlight on manual change
+                                }}
+                                className={cn(
+                                    "block w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm h-10 px-3 transition-all",
+                                    aiSuggested ? "border-purple-400 ring-1 ring-purple-400" : ""
+                                )}
+                            >
                                 <option value="product_sale">Product Sale</option>
                                 <option value="service">Service</option>
                                 <option value="other">Other</option>

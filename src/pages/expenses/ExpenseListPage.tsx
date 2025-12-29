@@ -14,6 +14,8 @@ import { Button } from '../../components/ui/Button';
 import { debounce } from '../../lib/performance';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { aiService } from '../../lib/ai';
+import { cn } from '../../lib/utils';
 
 const expenseSchema = z.object({
     date: z.string(),
@@ -26,16 +28,16 @@ const expenseSchema = z.object({
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
 const EXPENSE_CATEGORIES = [
-    'Rent',
-    'Salaries',
-    'Utilities',
-    'Inventory',
-    'Marketing',
-    'Software',
-    'Transport',
-    'Office Supplies',
-    'Maintenance',
-    'Other'
+    { label: 'Inventory', value: 'inventory' },
+    { label: 'Rent', value: 'rent' },
+    { label: 'Salaries', value: 'salaries' },
+    { label: 'Utilities', value: 'utilities' },
+    { label: 'Marketing', value: 'marketing' },
+    { label: 'Software', value: 'software' },
+    { label: 'Transport', value: 'transport' },
+    { label: 'Office Supplies', value: 'office_supplies' },
+    { label: 'Maintenance', value: 'maintenance' },
+    { label: 'Other', value: 'other' }
 ];
 
 export function ExpenseListPage() {
@@ -50,12 +52,16 @@ export function ExpenseListPage() {
     // Search & Filter
     const [searchTerm, setSearchTerm] = useState('');
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<ExpenseFormData>({
+    // AI States
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [aiSuggested, setAiSuggested] = useState(false);
+
+    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ExpenseFormData>({
         resolver: zodResolver(expenseSchema),
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
             amount: 0,
-            category: 'Inventory',
+            category: 'inventory',
             payment_method: 'cash',
         }
     });
@@ -167,7 +173,7 @@ export function ExpenseListPage() {
             reset({
                 date: new Date().toISOString().split('T')[0],
                 amount: 0,
-                category: 'Inventory',
+                category: 'inventory',
                 payment_method: 'cash',
                 description: '',
             });
@@ -178,8 +184,36 @@ export function ExpenseListPage() {
     const closeModal = () => {
         setIsModalOpen(false);
         setEditingExpense(null);
+        setAiSuggested(false);
         reset();
     };
+
+    // AI Categorization Logic
+    const watchedDescription = watch('description');
+
+    useEffect(() => {
+        if (!watchedDescription || watchedDescription.length < 5 || editingExpense) return;
+
+        const timer = setTimeout(async () => {
+            setIsAiLoading(true);
+            const prediction = await aiService.predictCategory(watchedDescription);
+
+            if (prediction && prediction.confidence > 0.6) {
+                const mappedCategory = aiService.mapToFrontendCategory(
+                    prediction.suggested_category,
+                    EXPENSE_CATEGORIES.map(c => c.value)
+                );
+
+                if (mappedCategory) {
+                    setValue('category', mappedCategory);
+                    setAiSuggested(true);
+                }
+            }
+            setIsAiLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [watchedDescription, setValue, editingExpense]);
 
     // Calculate totals with memoization
     const { totalExpenses, thisMonthExpenses, averageExpense } = useMemo(() => {
@@ -522,9 +556,23 @@ export function ExpenseListPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2 sm:col-span-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                            <select {...register('category')} className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm h-10 px-3">
-                                {EXPENSE_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
+                                Category
+                                {isAiLoading && <Loader2 className="h-3 w-3 animate-spin text-purple-600" />}
+                                {aiSuggested && !isAiLoading && <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full animate-pulse font-bold">AI Suggestion</span>}
+                            </label>
+                            <select
+                                {...register('category')}
+                                onChange={(e) => {
+                                    register('category').onChange(e);
+                                    setAiSuggested(false);
+                                }}
+                                className={cn(
+                                    "block w-full border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm h-10 px-3 transition-all",
+                                    aiSuggested ? "border-purple-400 ring-1 ring-purple-400" : ""
+                                )}
+                            >
+                                {EXPENSE_CATEGORIES.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
                             </select>
                         </div>
                         <div className="col-span-2 sm:col-span-1">

@@ -70,10 +70,69 @@ export interface Expense {
     business_id: string;
     date: string;
     amount: number;
-    category: 'stock' | 'transport' | 'rent' | 'utilities' | 'salaries' | 'marketing' | 'other';
+    category: 'inventory' | 'stock' | 'transport' | 'rent' | 'utilities' | 'salaries' | 'marketing' | 'software' | 'office_supplies' | 'maintenance' | 'other';
     payment_method: 'cash' | 'mtn' | 'airtel' | 'bank';
     vendor?: string;
     description?: string;
     receipt_url?: string;
     created_at: string;
+}
+
+// =============================================
+// ADMIN PORTAL TYPES
+// =============================================
+
+export type AdminRole = 'super_admin' | 'admin' | 'analyst';
+
+export interface AdminUser {
+    id: string;
+    user_id: string;
+    email: string;
+    full_name: string;
+    role: AdminRole;
+    is_active: boolean;
+    avatar_url?: string;
+    last_login_at?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PlatformAnnouncement {
+    id: string;
+    admin_id?: string;
+    title: string;
+    content: string;
+    type: 'info' | 'warning' | 'success' | 'error';
+    is_active: boolean;
+    starts_at: string;
+    ends_at?: string;
+    target_audience: 'all' | 'new_users' | 'active_users';
+    created_at: string;
+    updated_at: string;
+    admin?: AdminUser; // Joined
+}
+
+export interface PlatformSetting {
+    id: string;
+    key: string;
+    value: any;
+    description?: string;
+    updated_by?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+// Admin Dashboard Stats
+export interface PlatformStats {
+    totalBusinesses: number;
+    activeBusinesses: number;
+    totalIncome: number;
+    totalExpenses: number;
+    totalInvoices: number;
+    paidInvoices: number;
+    unpaidInvoices: number;
+    totalCustomers: number;
+    newBusinessesThisMonth: number;
+    incomeThisMonth: number;
+    expensesThisMonth: number;
 }
